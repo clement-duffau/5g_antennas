@@ -1,0 +1,16 @@
+# Données brutes ANFR et caches : jamais commités
+data/raw/
+data/cache/
+*.zip
+*.part
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Front
+node_modules/
+dist/
+.DS_Store
