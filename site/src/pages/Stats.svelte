@@ -2,7 +2,7 @@
   import { loadJSON } from '../lib/data'
   import type { CommuneRow, DepRow, Stats, SupportRow, SystemeRow } from '../lib/types'
   import { fmt, fmt1, fmt2, fmtDate, fmtPct } from '../lib/format'
-  import { GENERATIONS, MOBILE_OPS, opColor, seqColor } from '../lib/colors'
+  import { GENERATIONS, MOBILE_OPS, opColor, seqColor, seqInk } from '../lib/colors'
   import Section from '../lib/ui/Section.svelte'
   import Panel from '../lib/ui/Panel.svelte'
   import Chips from '../lib/ui/Chips.svelte'
@@ -11,6 +11,7 @@
   import StackedColumns from '../lib/charts/StackedColumns.svelte'
   import SpectrumStrip from '../lib/charts/SpectrumStrip.svelte'
   import AzimuthRose from '../lib/charts/AzimuthRose.svelte'
+  import Choropleth from '../lib/charts/Choropleth.svelte'
 
   const statsPromise = loadJSON<Stats>('stats.json')
 
@@ -22,6 +23,13 @@
 
   let genDeploiement = $state('5G')
   let communeVue = $state('top')
+  let choroVue = $state('km2')
+  const contours = loadJSON<{ features: any[] }>('departements.geojson').catch(() => null)
+  const CHORO: Record<string, { label: string; key: keyof DepRow; format: (n: number) => string }> = {
+    km2: { label: 'Supports pour 100 km²', key: 'supports_par_100km2', format: fmt1 },
+    hab: { label: 'Supports pour 10 000 habitants', key: 'supports_par_10k_hab', format: fmt1 },
+    '5g': { label: 'Part des sites mobiles équipés en 5G', key: 'part_5g', format: fmtPct },
+  }
 
   const opShort = (op: string) => (op === 'Bouygues Telecom' ? 'Bouygues' : op)
 
@@ -154,7 +162,7 @@
                   <th scope="row">{sys.systeme}</th>
                   {#each cells as v}
                     <td class="num numeric" style:background={v ? seqColor(0.15 + (0.85 * v) / mx.max) : 'transparent'}
-                      class:light={v / mx.max > 0.55}>{v ? fmt(v) : '·'}</td>
+                      style:color={v ? seqInk(0.15 + (0.85 * v) / mx.max) : 'var(--muted)'}>{v ? fmt(v) : '·'}</td>
                   {/each}
                 </tr>
               {/each}
@@ -168,7 +176,7 @@
         <div class="segbar" role="img" aria-label="Répartition des supports mobiles selon le nombre d'opérateurs présents">
           {#each s.partage_mobile as p (p.operateurs)}
             <div class="seg" style:flex-grow={p.supports} style:background={seqColor(p.operateurs / 4)}
-              class:light={p.operateurs >= 3} title="{p.operateurs} opérateur(s) : {fmt(p.supports)} supports">
+              style:color={seqInk(p.operateurs / 4)} title="{p.operateurs} opérateur(s) : {fmt(p.supports)} supports">
               {#if p.supports / tot > 0.08}<span>{fmtPct(p.supports / tot)}</span>{/if}
             </div>
           {/each}
@@ -228,7 +236,22 @@
 
   <Section id="territoires" title="Territoires"
     intro="Densités calculées avec la population et la superficie des communes (geo.api.gouv.fr). Les arrondissements de Paris, Lyon et Marseille sont rattachés à leur commune.">
-    <div class="grid2">
+    {#await contours then geo}
+      {#if geo}
+        {@const c = CHORO[choroVue]}
+        <div class="choro-wrap">
+          <div class="choro-head">
+            <Chips label="Indicateur de la carte" bind:value={choroVue}
+              options={[{ value: 'km2', label: 'Densité au km²' }, { value: 'hab', label: 'Par habitant' }, { value: '5g', label: 'Part de la 5G' }]} />
+            <p class="aside">{c.label}, par département ; classes par quintiles. Cliquez sur un département pour l'afficher sur la carte.</p>
+          </div>
+          <Choropleth features={geo.features} label="{c.label} par département"
+            values={Object.fromEntries(s.departements.map((d) => [d.dep, d[c.key] as number]))}
+            format={c.format} href={(code) => `#/carte?dep=${code}`} />
+        </div>
+      {/if}
+    {/await}
+    <div class="grid2 gap-top">
       <Panel title="Supports pour 100 km²">
         <BarList label="Départements les plus denses en supports"
           items={[...s.departements].sort((a, b) => b.supports_par_100km2 - a.supports_par_100km2).slice(0, 10)
@@ -278,10 +301,10 @@
           <ol class="records">
             {#each rec.rows.slice(0, 10) as r (r.sup_id)}
               <li>
-                <div class="rec-main">
+                <a class="rec-main" href="#/carte?s={r.sup_id}" title="Voir ce support sur la carte">
                   <strong class="num">{rec.val(r)}</strong>
                   <span>{supportLabel(r)}</span>
-                </div>
+                </a>
                 <div class="rec-sub">
                   {r.nature ?? 'Nature inconnue'}{r.adresse ? ` · ${r.adresse}` : ''}
                 </div>
@@ -351,13 +374,11 @@
   .heat th { font-weight: 500; color: var(--text-2); text-align: left; padding: 4px 8px; white-space: nowrap; }
   .heat thead th { font-weight: 560; }
   .heat td { padding: 4px 8px; border-radius: 3px; color: var(--text); }
-  .heat td.light { color: var(--accent-ink); }
   .numeric { text-align: right; }
   .dot { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0.05em; }
 
   .segbar { display: flex; height: 28px; gap: 2px; }
   .seg { min-width: 2px; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 0.8rem; font-weight: 600; color: var(--text); }
-  .seg.light { color: var(--accent-ink); }
   .seglegend { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; font-size: 0.86rem; color: var(--text-2); }
   .seglegend li { display: flex; align-items: center; gap: 6px; }
   .seglegend strong { color: var(--text); font-weight: 600; }
@@ -369,7 +390,11 @@
     content: counter(rec); position: absolute; left: 0; top: 1px; width: 20px; text-align: right;
     color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums;
   }
-  .rec-main { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .rec-main { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; color: var(--text); text-decoration: none; }
+  .rec-main:hover span { text-decoration: underline; }
+  .choro-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 24px 40px; align-items: start; }
+  .choro-head { display: grid; gap: 12px; align-content: start; }
+  @media (max-width: 760px) { .choro-wrap { grid-template-columns: 1fr; } }
   .rec-main strong { font-weight: 640; }
   .rec-main span { color: var(--text-2); }
   .rec-sub { color: var(--muted); font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
