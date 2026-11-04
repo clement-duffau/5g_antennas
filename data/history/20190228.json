@@ -1,0 +1,118 @@
+{
+ "emetteurs": 1273992,
+ "extraction": "20190228",
+ "sites": {
+  "Bouygues Telecom": {
+   "2G": 20242,
+   "3G": 21220,
+   "4G": 18446,
+   "5G": 0,
+   "total": 21547
+  },
+  "Free": {
+   "2G": 0,
+   "3G": 18011,
+   "4G": 15543,
+   "5G": 0,
+   "total": 18011
+  },
+  "Orange": {
+   "2G": 20559,
+   "3G": 24467,
+   "4G": 21102,
+   "5G": 0,
+   "total": 24858
+  },
+  "SFR": {
+   "2G": 20403,
+   "3G": 21822,
+   "4G": 18628,
+   "5G": 0,
+   "total": 21972
+  }
+ },
+ "supports": 71723,
+ "systemes": {
+  "GSM 1800": {
+   "Bouygues Telecom": 24716,
+   "Orange": 15737,
+   "SFR": 6341,
+   "autres": 2,
+   "total": 46796
+  },
+  "GSM 1800/GSM 900": {
+   "Orange": 2,
+   "SFR": 21,
+   "total": 23
+  },
+  "GSM 900": {
+   "Bouygues Telecom": 54154,
+   "Orange": 53078,
+   "SFR": 56781,
+   "total": 164013
+  },
+  "GSM 900/GSM 1800": {
+   "Orange": 71,
+   "total": 71
+  },
+  "LTE 1800": {
+   "Bouygues Telecom": 34624,
+   "Free": 43492,
+   "Orange": 39761,
+   "SFR": 37149,
+   "autres": 2,
+   "total": 155028
+  },
+  "LTE 2100": {
+   "Bouygues Telecom": 10069,
+   "Free": 1,
+   "Orange": 21134,
+   "SFR": 14566,
+   "total": 45770
+  },
+  "LTE 2600": {
+   "Bouygues Telecom": 19541,
+   "Free": 43492,
+   "Orange": 28737,
+   "SFR": 21084,
+   "autres": 2,
+   "total": 112856
+  },
+  "LTE 700": {
+   "Bouygues Telecom": 4789,
+   "Free": 17883,
+   "Orange": 292,
+   "SFR": 6,
+   "autres": 16,
+   "total": 22986
+  },
+  "LTE 800": {
+   "Bouygues Telecom": 49538,
+   "Orange": 53192,
+   "SFR": 50504,
+   "autres": 2,
+   "total": 153236
+  },
+  "UMTS 2100": {
+   "Bouygues Telecom": 43133,
+   "Free": 45009,
+   "Orange": 50247,
+   "SFR": 48651,
+   "autres": 5,
+   "total": 187045
+  },
+  "UMTS 2100/UMTS 900": {
+   "SFR": 26,
+   "total": 26
+  },
+  "UMTS 900": {
+   "Bouygues Telecom": 52552,
+   "Free": 50738,
+   "Orange": 60292,
+   "SFR": 55398,
+   "autres": 2,
+   "total": 218982
+  }
+ },
+ "systemes_non_references": []
+}

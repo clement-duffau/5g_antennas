@@ -1,0 +1,126 @@
+{
+ "emetteurs": 2165334,
+ "extraction": "20240329",
+ "sites": {
+  "Bouygues Telecom": {
+   "2G": 22458,
+   "3G": 29680,
+   "4G": 29761,
+   "5G": 17073,
+   "total": 29923
+  },
+  "Free": {
+   "2G": 0,
+   "3G": 29756,
+   "4G": 29739,
+   "5G": 23751,
+   "total": 29766
+  },
+  "Orange": {
+   "2G": 19167,
+   "3G": 31214,
+   "4G": 32310,
+   "5G": 12736,
+   "total": 32354
+  },
+  "SFR": {
+   "2G": 21842,
+   "3G": 28653,
+   "4G": 28632,
+   "5G": 15192,
+   "total": 28753
+  }
+ },
+ "supports": 87615,
+ "systemes": {
+  "5G NR 2100": {
+   "Bouygues Telecom": 48422,
+   "Orange": 1045,
+   "SFR": 32974,
+   "total": 82441
+  },
+  "5G NR 3500": {
+   "Bouygues Telecom": 30872,
+   "Free": 23013,
+   "Orange": 36161,
+   "SFR": 31301,
+   "total": 121347
+  },
+  "5G NR 700": {
+   "Free": 68886,
+   "Orange": 35,
+   "total": 68921
+  },
+  "GSM 1800": {
+   "Bouygues Telecom": 2699,
+   "Orange": 927,
+   "SFR": 1201,
+   "total": 4827
+  },
+  "GSM 900": {
+   "Bouygues Telecom": 62224,
+   "Orange": 51929,
+   "SFR": 60618,
+   "total": 174771
+  },
+  "LTE 1800": {
+   "Bouygues Telecom": 60741,
+   "Free": 70814,
+   "Orange": 69781,
+   "SFR": 58902,
+   "autres": 3,
+   "total": 260241
+  },
+  "LTE 2100": {
+   "Bouygues Telecom": 51413,
+   "Free": 67623,
+   "Orange": 53063,
+   "SFR": 51731,
+   "total": 223830
+  },
+  "LTE 2600": {
+   "Bouygues Telecom": 42938,
+   "Free": 68147,
+   "Orange": 39022,
+   "SFR": 40924,
+   "autres": 2,
+   "total": 191033
+  },
+  "LTE 700": {
+   "Bouygues Telecom": 57056,
+   "Free": 84056,
+   "Orange": 69329,
+   "SFR": 44375,
+   "autres": 71,
+   "total": 254887
+  },
+  "LTE 800": {
+   "Bouygues Telecom": 81400,
+   "Orange": 87611,
+   "SFR": 78678,
+   "autres": 2,
+   "total": 247691
+  },
+  "LTE 900": {
+   "Orange": 7,
+   "total": 7
+  },
+  "UMTS 2100": {
+   "Bouygues Telecom": 8446,
+   "Free": 3672,
+   "Orange": 3693,
+   "SFR": 19113,
+   "autres": 2,
+   "total": 34926
+  },
+  "UMTS 900": {
+   "Bouygues Telecom": 81378,
+   "Free": 85175,
+   "Orange": 86560,
+   "SFR": 78963,
+   "autres": 2,
+   "total": 332078
+  }
+ },
+ "systemes_non_references": []
+}

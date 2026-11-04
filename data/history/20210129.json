@@ -1,0 +1,134 @@
+{
+ "emetteurs": 1596219,
+ "extraction": "20210129",
+ "sites": {
+  "Bouygues Telecom": {
+   "2G": 20955,
+   "3G": 23543,
+   "4G": 22993,
+   "5G": 3850,
+   "total": 23744
+  },
+  "Free": {
+   "2G": 0,
+   "3G": 21798,
+   "4G": 21626,
+   "5G": 14427,
+   "total": 21805
+  },
+  "Orange": {
+   "2G": 20159,
+   "3G": 28087,
+   "4G": 27960,
+   "5G": 2430,
+   "total": 28182
+  },
+  "SFR": {
+   "2G": 20400,
+   "3G": 23243,
+   "4G": 22761,
+   "5G": 2135,
+   "total": 23325
+  }
+ },
+ "supports": 77743,
+ "systemes": {
+  "5G NR 2100": {
+   "Bouygues Telecom": 10565,
+   "Orange": 2360,
+   "SFR": 5134,
+   "total": 18059
+  },
+  "5G NR 3500": {
+   "Bouygues Telecom": 3883,
+   "Free": 3376,
+   "Orange": 4947,
+   "SFR": 2760,
+   "total": 14966
+  },
+  "5G NR 700": {
+   "Free": 42141,
+   "total": 42141
+  },
+  "GSM 1800": {
+   "Bouygues Telecom": 12169,
+   "Orange": 7463,
+   "SFR": 3585,
+   "autres": 2,
+   "total": 23219
+  },
+  "GSM 1800/GSM 900": {
+   "SFR": 4,
+   "total": 4
+  },
+  "GSM 900": {
+   "Bouygues Telecom": 57481,
+   "Orange": 53409,
+   "SFR": 56597,
+   "total": 167487
+  },
+  "GSM 900/GSM 1800": {
+   "Orange": 3,
+   "total": 3
+  },
+  "LTE 1800": {
+   "Bouygues Telecom": 40934,
+   "Free": 53562,
+   "Orange": 59464,
+   "SFR": 42418,
+   "autres": 2,
+   "total": 196380
+  },
+  "LTE 2100": {
+   "Bouygues Telecom": 17470,
+   "Free": 1,
+   "Orange": 39577,
+   "SFR": 26265,
+   "total": 83313
+  },
+  "LTE 2600": {
+   "Bouygues Telecom": 23857,
+   "Free": 51410,
+   "Orange": 35143,
+   "SFR": 26999,
+   "autres": 2,
+   "total": 137411
+  },
+  "LTE 700": {
+   "Bouygues Telecom": 12598,
+   "Free": 59671,
+   "Orange": 20918,
+   "SFR": 4707,
+   "autres": 16,
+   "total": 97910
+  },
+  "LTE 800": {
+   "Bouygues Telecom": 62187,
+   "Orange": 73640,
+   "SFR": 61239,
+   "autres": 2,
+   "total": 197068
+  },
+  "UMTS 2100": {
+   "Bouygues Telecom": 37673,
+   "Free": 53075,
+   "Orange": 49726,
+   "SFR": 49747,
+   "autres": 5,
+   "total": 190226
+  },
+  "UMTS 2100/UMTS 900": {
+   "SFR": 5,
+   "total": 5
+  },
+  "UMTS 900": {
+   "Bouygues Telecom": 60640,
+   "Free": 61779,
+   "Orange": 75663,
+   "SFR": 60326,
+   "autres": 2,
+   "total": 258410
+  }
+ },
+ "systemes_non_references": []
+}
