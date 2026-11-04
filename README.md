@@ -19,7 +19,7 @@ Les données sont régénérées chaque mois par une GitHub Action, puis le site
 | 1 | Pipeline, statistiques, page Statistiques, déploiement | fait |
 | 2 | Carte des supports et fiche support | fait |
 | 3 | Filtres combinables | fait |
-| 4 | Recherche « autour de moi » | à faire |
+| 4 | Recherche « autour de moi » | fait |
 | 5 | Frise du déploiement (avec les archives depuis 2018) | à faire |
 | 6 | Spectre d'une zone | à faire |
 | 7 | Finitions, page À propos complète | en partie (page À propos déjà en ligne) |
@@ -123,8 +123,14 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
   n'attrape pas un pylône où Free n'a que de la 4G et Orange de la 5G. Les critères du support (territoire,
   nature, hauteur) sont testés sur l'index. Au sein d'un critère, les valeurs se combinent par OU ; entre
   critères, par ET. Le calcul parcourt 880 000 lignes en quelques dizaines de millisecondes.
+- **Autour de moi.** Recherche de communes dans l'index local (centre geo.api.gouv.fr, sans réseau), d'adresses
+  via le [géocodeur IGN Géoplateforme](https://geoservices.ign.fr/documentation/services/services-geoplateforme/geocodage)
+  appelé depuis le navigateur, ou position de l'appareil. La zone (centre + rayon de 500 m à 10 km) est un filtre
+  de plus, combinable avec les autres ; le panneau donne, par opérateur, le site le plus proche et le site 5G le
+  plus proche (distance, direction), les sites 2G à 5G dans le rayon et la liste des supports par distance.
 - **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`, et les filtres :
-  `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`.
+  `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`,
+  et la zone : `zone=<lat>,<lon>,<rayon en m>&zl=<libellé>`.
 
 ## Déploiement
 
@@ -139,6 +145,7 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
 - [geo.api.gouv.fr](https://geo.api.gouv.fr/) (populations et superficies communales).
 - Contours des départements : [Etalab / IGN](https://github.com/etalab/contours-administratifs), ou à défaut
   [france-geojson](https://github.com/gregoiredavid/france-geojson) (dérivé IGN).
+- Géocodage des adresses : [IGN Géoplateforme](https://data.geopf.fr/geocodage/) (Base adresse nationale).
 - Fond de carte : [OpenFreeMap](https://openfreemap.org/), © [OpenMapTiles](https://www.openmaptiles.org/),
   données © [contributeurs OpenStreetMap](https://www.openstreetmap.org/copyright).
 

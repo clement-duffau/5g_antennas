@@ -4,8 +4,10 @@
   import { fmt, fmt1, fmtDate } from '../format'
   import { MOBILE_OPS, opColor } from '../colors'
 
-  let { index, i, onclose, onfocus }: {
+  let { index, i, onclose, onfocus, back = null }: {
     index: SupportIndex; i: number; onclose: () => void; onfocus: () => void
+    /** retour à la liste de la zone, le cas échéant */
+    back?: { label: string; go: () => void } | null
   } = $props()
 
   const id = $derived(index.id[i])
@@ -70,6 +72,9 @@
 </script>
 
 <aside class="sheet" aria-labelledby="sheet-title">
+  {#if back}
+    <button type="button" class="back" onclick={back.go}>← {back.label}</button>
+  {/if}
   <header>
     <div>
       <p class="kicker">Support n° {id}</p>
@@ -163,6 +168,7 @@
   .sheet { padding: 18px 20px 28px; display: grid; gap: 14px; align-content: start; }
   header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .kicker { color: var(--muted); font-size: 0.8rem; }
+  .back { justify-self: start; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font-size: 0.85rem; }
   h2 { font-size: 1.35rem; }
   .dep { color: var(--muted); font-weight: 400; }
   .close { background: none; border: 1px solid var(--line-strong); border-radius: var(--radius); width: 32px; height: 32px; display: grid; place-items: center; color: var(--text-2); cursor: pointer; flex: none; }

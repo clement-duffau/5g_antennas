@@ -3,6 +3,8 @@
   import MapView, { type DisplayMode, type View } from '../lib/map/MapView.svelte'
   import SupportSheet from '../lib/map/SupportSheet.svelte'
   import FilterPanel, { type Facets } from '../lib/map/FilterPanel.svelte'
+  import PlaceSearch, { type Place } from '../lib/map/PlaceSearch.svelte'
+  import ZonePanel from '../lib/map/ZonePanel.svelte'
   import { loadSupports, type SupportIndex } from '../lib/supports'
   import { loadServices, type Services } from '../lib/services'
   import { loadJSON } from '../lib/data'
@@ -36,6 +38,15 @@
   let servicesError = $state<string | null>(null)
   let deps = $state<{ dep: string; nom: string }[]>([])
   loadJSON<{ dep: string; nom: string }[]>('departements.json').then((d) => (deps = d)).catch(() => {})
+
+  // Zone « autour de moi » : rayon par défaut selon le type de lieu.
+  function pickPlace(pl: Place) {
+    const r = filters.zone?.r ?? (pl.kind === 'commune' ? 2000 : 1000)
+    filters = { ...filters, zone: { lat: pl.lat, lon: pl.lon, r, label: pl.label } }
+    selected = null
+    setParams({ s: null })
+  }
+  const otherFilters = $derived(!isEmpty({ ...filters, zone: null }))
 
   const activeCount = $derived(
     filters.ops.length + filters.gens.length + filters.fams.length + filters.sys.length + filters.deps.length +
@@ -147,11 +158,13 @@
     <p class="loading">Chargement des supports…</p>
   {:then { index, cats }}
     <MapView bind:this={mapView} {index} {cats} {colorMode} {display} {hidden} visible={result?.mask ?? null} {selected}
+      zone={filters.zone}
       theme={theme.value} view={initialView}
       onselect={(i) => select(i, index)}
       onview={(v) => setParams({ z: v.zoom, c: `${v.lat},${v.lon}` })} />
 
     <div class="controls" class:open={panelOpen}>
+      <PlaceSearch {index} onpick={pickPlace} />
       <div class="bar">
         <button class="toggle" type="button" onclick={() => (panelOpen = !panelOpen)} aria-expanded={panelOpen}>
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
@@ -168,7 +181,7 @@
             <button role="tab" aria-selected={tab === 'filtres'} onclick={() => (tab = 'filtres')}>Filtres</button>
             <button role="tab" aria-selected={tab === 'affichage'} onclick={() => (tab = 'affichage')}>Affichage</button>
             {#if activeCount}
-              <button class="reset" type="button" onclick={() => (filters = { ...EMPTY })}>Tout effacer</button>
+              <button class="reset" type="button" onclick={() => (filters = { ...EMPTY, zone: filters.zone })}>Tout effacer</button>
             {/if}
           </div>
           {#if tab === 'filtres'}
@@ -211,7 +224,16 @@
     {#if selected !== null}
       {@const sel = selected}
       <div class="sheet-wrap">
-        <SupportSheet {index} i={sel} onclose={() => select(null, index)} onfocus={() => mapView?.focus(sel)} />
+        <SupportSheet {index} i={sel} onclose={() => select(null, index)} onfocus={() => mapView?.focus(sel)}
+          back={filters.zone ? { label: `Autour de ${filters.zone.label}`, go: () => select(null, index) } : null} />
+      </div>
+    {:else if filters.zone}
+      {@const z = filters.zone}
+      <div class="sheet-wrap">
+        <ZonePanel {index} {services} zone={z} mask={result?.mask ?? null} filtered={otherFilters}
+          onselect={(i) => select(i, index)}
+          onradius={(r) => (filters = { ...filters, zone: { ...z, r } })}
+          onclose={() => (filters = { ...filters, zone: null })} />
       </div>
     {/if}
   {:catch e}
@@ -223,7 +245,7 @@
   .page { position: relative; height: calc(100dvh - 57px); overflow: hidden; background: var(--page); }
   .loading { padding: 40px var(--gutter); color: var(--text-2); }
 
-  .controls { position: absolute; top: 12px; left: 12px; z-index: 3; width: min(320px, calc(100% - 70px)); }
+  .controls { position: absolute; top: 12px; left: 12px; z-index: 3; width: min(320px, calc(100% - 70px)); display: grid; gap: 8px; }
   .bar { display: flex; align-items: center; gap: 10px; }
   .bar .total {
     padding: 6px 10px; border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -238,9 +260,9 @@
     border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); cursor: pointer; font-size: 0.88rem;
   }
   .panel {
-    margin-top: 8px; padding: 14px; border-radius: 10px; background: color-mix(in srgb, var(--surface) 94%, transparent);
+    padding: 14px; border-radius: 10px; background: color-mix(in srgb, var(--surface) 94%, transparent);
     border: 1px solid var(--line); box-shadow: 0 10px 30px rgb(0 0 0 / 0.25); display: grid; gap: 14px;
-    max-height: calc(100dvh - 57px - 80px); overflow-y: auto;
+    max-height: calc(100dvh - 57px - 130px); overflow-y: auto;
   }
   .total { color: var(--text-2); }
   .total strong { color: var(--text); font-weight: 640; }

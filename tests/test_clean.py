@@ -154,6 +154,7 @@ def test_export_index_et_details(con, tmp_path):
     assert idx["n"] == 2
     i1 = cols["id"].index(1)
     assert cols["lat"][i1] == round((48 + 6 / 60 + 36 / 3600) * 1e5)
+    assert idx["dictionnaires"]["com"][0] == ["35238", "Rennes", 48.11, -1.68]
     assert idx["dictionnaires"]["ops"][:4] == ["Orange", "Bouygues Telecom", "SFR", "Free"]
     assert cols["ops"][i1] == 0b00101                        # Orange (bit 0) et SFR (bit 2)
     assert cols["gen"][i1] == 0b1100                         # 4G et 5G (une date invalide n'exclut pas l'émetteur)
