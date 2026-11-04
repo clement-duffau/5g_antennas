@@ -4,13 +4,14 @@
 </script>
 
 <script lang="ts">
-  import maplibregl, { type GeoJSONSource, type MapLayerMouseEvent, type StyleSpecification } from 'maplibre-gl'
+  import maplibregl, { type GeoJSONSource, type MapLayerMouseEvent } from 'maplibre-gl'
   import 'maplibre-gl/dist/maplibre-gl.css'
   import { onDestroy, onMount } from 'svelte'
   import { communeOf, type SupportIndex } from '../supports'
   import { resolveColor, type ColorMode } from '../categories'
   import { fmt, fmt1 } from '../format'
   import { circle } from '../geo'
+  import { BASEMAPS, BOUNDS, fallbackStyle } from './basemap'
   import type { FeatureCollection } from 'geojson'
   import type { Zone } from '../filters'
 
@@ -34,11 +35,6 @@
     zone?: Zone | null
   } = $props()
 
-  const BASEMAPS = {
-    dark: 'https://tiles.openfreemap.org/styles/dark',
-    light: 'https://tiles.openfreemap.org/styles/positron',
-  }
-  const BOUNDS: [[number, number], [number, number]] = [[-9.5, 39.5], [14, 53]]
 
   let container: HTMLDivElement
   let map: maplibregl.Map | undefined
@@ -198,19 +194,6 @@
   }
 
   // ------------------------------------------------------------------ fond de carte
-  function fallbackStyle(): StyleSpecification {
-    return {
-      version: 8,
-      glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
-      sources: { deps: { type: 'geojson', data: `${import.meta.env.BASE_URL}data/departements.geojson` } },
-      layers: [
-        { id: 'bg', type: 'background', paint: { 'background-color': resolveColor('var(--page)') } },
-        { id: 'deps-fill', type: 'fill', source: 'deps', paint: { 'fill-color': resolveColor('var(--surface)') } },
-        { id: 'deps-line', type: 'line', source: 'deps', paint: { 'line-color': resolveColor('var(--line-strong)'), 'line-width': 0.8 } },
-      ],
-    }
-  }
-
   function setBasemap() {
     if (!map) return
     ready = false

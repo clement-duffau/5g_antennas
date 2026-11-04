@@ -6,6 +6,7 @@ import { untrack } from 'svelte'
  */
 export const ROUTES = [
   { path: 'carte', label: 'Carte' },
+  { path: 'frise', label: 'Frise' },
   { path: 'statistiques', label: 'Statistiques' },
   { path: 'a-propos', label: 'À propos' },
 ] as const
