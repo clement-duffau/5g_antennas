@@ -1,0 +1,66 @@
+libelle,famille,generation,bande,f_min,f_max,description
+GSM 900,Mobile,2G,900 MHz,869,960,GSM bande 900 MHz (E-GSM)
+GSM 1800,Mobile,2G,1800 MHz,1710,1880,GSM bande 1800 MHz (DCS)
+UMTS 900,Mobile,3G,900 MHz,869,960,UMTS bande 900 MHz (B8)
+UMTS 2100,Mobile,3G,2100 MHz,1900,2170,UMTS bande 2100 MHz (B1)
+LTE 700,Mobile,4G,700 MHz,694,790,LTE bande 28
+LTE 800,Mobile,4G,800 MHz,790,862,LTE bande 20
+LTE 900,Mobile,4G,900 MHz,869,960,LTE bande 8
+LTE 1800,Mobile,4G,1800 MHz,1710,1880,LTE bande 3
+LTE 2100,Mobile,4G,2100 MHz,1900,2170,LTE bande 1
+LTE 2600,Mobile,4G,2600 MHz,2500,2690,LTE bande 7
+LTE 700 P,Réseau privé,4G,700 MHz,694,790,LTE privé bande 700 MHz
+LTE 2600 P,Réseau privé,4G,2600 MHz,2500,2690,LTE privé bande 2600 MHz (TDD)
+5G NR 700,Mobile,5G,700 MHz,694,790,NR bande n28
+5G NR 2100,Mobile,5G,2100 MHz,1900,2170,NR bande n1
+5G NR 3500,Mobile,5G,3500 MHz,3400,3800,NR bande n78
+5G NR 1400 Expe,Expérimentation,5G,1400 MHz,1427,1518,Expérimentation NR bande L
+5G NR 3800-4200 Expe,Expérimentation,5G,3800 MHz,3800,4200,Expérimentation NR 3800-4200 MHz
+5G NR 26 GHz Expe,Expérimentation,5G,26 GHz,24250,27500,Expérimentation NR bande n258
+5G Broadcast Expe,Expérimentation,5G,,,,Expérimentation 5G Broadcast
+GSM R,Ferroviaire,2G,GSM-R,869,925,GSM-R (SNCF Réseau)
+BLR LTE 3500,Boucle locale radio,4G,3500 MHz,3400,3800,"THD radio LTE 3,5 GHz"
+BLR 3 GHZ,Boucle locale radio,,3500 MHz,3400,3800,"BLR 3,5 GHz"
+BLR 26 GHZ,Boucle locale radio,,26 GHz,24250,27500,BLR 26 GHz
+FH,Faisceau hertzien,,,1000,100000,Liaison point à point
+FH ABI,Faisceau hertzien,,,,,Faisceau hertzien (autorisation à bande individuelle)
+FM,Radiodiffusion,,FM,87.5,108,Radio FM
+RDF DVB-T,Radiodiffusion,,TNT,470,790,Télévision numérique terrestre
+RDF T-DAB,Radiodiffusion,,DAB+,174,240,Radio numérique DAB+
+RDF AM,Radiodiffusion,,AM,0.1,30,Radio AM (GO/PO/OC)
+RDF TV-AN,Radiodiffusion,,TV analogique,47,862,Télévision analogique
+PMR,PMR,,,,,Radio mobile professionnelle
+TETRA,PMR,,,380,470,TETRA
+TETRAPOL,PMR,,,70,470,TETRAPOL
+RMU-POCSAG,PMR,,,,,Radiomessagerie POCSAG
+COM TER,PMR,,,,,Communications terrestres
+COM MAR,Maritime et aéronautique,,,,,Communications maritimes
+AIS,Maritime et aéronautique,,,,,Système d'identification automatique (navires)
+AIS/GPS,Maritime et aéronautique,,,,,AIS / GPS
+COM AER,Maritime et aéronautique,,,,,Communications aéronautiques
+COM AERTER,Maritime et aéronautique,,,,,Communications aéronautiques terrestres
+ADS-B,Maritime et aéronautique,,,,,Surveillance aéronautique ADS-B
+DME,Maritime et aéronautique,,,,,Radionavigation DME
+VOR-C,Maritime et aéronautique,,,,,Radionavigation VOR
+GONIO,Maritime et aéronautique,,,,,Radiogoniométrie
+RDR,Radar,,,,,Radar
+RDR MTO,Radar,,,,,Radar météorologique
+RDR PFL,Radar,,,,,Radar profileur de vent
+RDR COT,Radar,,,,,Radar côtier
+SAT,Satellite,,,,,Station terrienne
+SAT GEO,Satellite,,,100,100000,Station terrienne (satellite géostationnaire)
+SAT NGEO,Satellite,,,100,100000,Station terrienne (satellite non géostationnaire)
+GPS,Satellite,,,,,GPS
+GPS D,Satellite,,,,,GPS différentiel
+RADIOASTRO,Science,,,,,Radioastronomie
+RS,Science,,,,,Radiosondage
+TELEM,Télémesure et télécommande,,,,,Télémesure
+TELECD,Télémesure et télécommande,,,,,Télécommande
+TELEM/TELECD,Télémesure et télécommande,,,,,Télémesure / télécommande
+TELECD/TELEM,Télémesure et télécommande,,,,,Télécommande / télémesure
+EM,Autre,,,,,Émission
+REC,Autre,,,,,Réception
+EM/REC,Autre,,,,,Émission / réception
+ANM,Autre,,,,,
+ANA,Autre,,,,,
+TROPO,Autre,,,,,Liaison transhorizon (troposphérique)
