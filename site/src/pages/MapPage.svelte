@@ -5,6 +5,8 @@
   import FilterPanel, { type Facets } from '../lib/map/FilterPanel.svelte'
   import PlaceSearch, { type Place } from '../lib/map/PlaceSearch.svelte'
   import ZonePanel from '../lib/map/ZonePanel.svelte'
+  import SpectrumDialog from '../lib/map/SpectrumDialog.svelte'
+  import { occupation } from '../lib/spectrum'
   import { loadSupports, type SupportIndex } from '../lib/supports'
   import { loadServices, type Services } from '../lib/services'
   import { loadJSON } from '../lib/data'
@@ -45,6 +47,20 @@
     filters = { ...filters, zone: { lat: pl.lat, lon: pl.lon, r, label: pl.label } }
     selected = null
     setParams({ s: null })
+  }
+  let spectrumOpen = $state(false)
+  /** Libellé court de la sélection pour le titre du spectre. */
+  function selectionTitle(index: SupportIndex) {
+    if (filters.zone) return `autour de ${filters.zone.label}`
+    if (filters.com) {
+      const c = index.dict.com.find(([insee]) => insee === filters.com)
+      return c ? `de ${c[1]}` : 'de la sélection'
+    }
+    if (filters.deps.length === 1) {
+      const d = deps.find((x) => x.dep === filters.deps[0])
+      return d ? `du département ${d.dep} (${d.nom})` : 'de la sélection'
+    }
+    return 'de la sélection'
   }
   const otherFilters = $derived(!isEmpty({ ...filters, zone: null }))
 
@@ -174,6 +190,9 @@
           <strong class="num">{fmt(result ? result.count : index.n)}</strong>
           {result ? `sur ${fmt(index.n)} supports` : 'supports'}
         </p>
+        {#if result && services && result.count > 0}
+          <button class="spec" type="button" onclick={() => (spectrumOpen = true)} title="Occupation des fréquences de la sélection">Spectre</button>
+        {/if}
       </div>
       {#if panelOpen}
         <div class="panel">
@@ -236,6 +255,10 @@
           onclose={() => (filters = { ...filters, zone: null })} />
       </div>
     {/if}
+    {#if spectrumOpen && services && result}
+      <SpectrumDialog occ={occupation(services, result.mask, index.n)} count={result.count}
+        title={selectionTitle(index)} onclose={() => (spectrumOpen = false)} />
+    {/if}
   {:catch e}
     <p class="loading">Les supports n'ont pas pu être chargés ({e.message}).</p>
   {/await}
@@ -246,7 +269,12 @@
   .loading { padding: 40px var(--gutter); color: var(--text-2); }
 
   .controls { position: absolute; top: 12px; left: 12px; z-index: 3; width: min(320px, calc(100% - 70px)); display: grid; gap: 8px; }
-  .bar { display: flex; align-items: center; gap: 10px; }
+  .bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .spec {
+    padding: 6px 10px; border-radius: var(--radius); border: 1px solid var(--line-strong); cursor: pointer; font-size: 0.85rem;
+    background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--text);
+  }
+  .spec:hover { border-color: var(--accent); }
   .bar .total {
     padding: 6px 10px; border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 88%, transparent);
     border: 1px solid var(--line); white-space: nowrap; font-size: 0.85rem;

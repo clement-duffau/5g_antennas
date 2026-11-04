@@ -21,7 +21,7 @@ Les données sont régénérées chaque mois par une GitHub Action, puis le site
 | 3 | Filtres combinables | fait |
 | 4 | Recherche « autour de moi » | fait |
 | 5 | Frise du déploiement (avec les archives depuis 2018) | fait |
-| 6 | Spectre d'une zone | à faire |
+| 6 | Spectre d'une zone | fait |
 | 7 | Finitions, page À propos complète | en partie (page À propos déjà en ligne) |
 
 ## Démarrage rapide
@@ -137,6 +137,11 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
   « archive par archive » viennent des agrégats mensuels de `data/history/`, qui montrent aussi les démontages
   (extinction 2G/3G, refarming). Ces agrégats (~2 Ko par mois) sont **commités** : le workflow de déploiement
   calcule les mois manquants et les enregistre sur `main`, pour ne pas retélécharger 6 Go d'archives à chaque fois.
+- **Spectre d'une sélection.** Calculé dans le navigateur à partir des bandes exactes de la table des services
+  pour les supports retenus (zone « autour de moi », commune, département ou tout autre filtre) : une rangée par
+  exploitant, une barre par bande déclarée, couleur par famille de systèmes, opacité selon la part des supports
+  concernés. Vues : tout le spectre (échelle logarithmique, bandes UIT), 30 MHz–1 GHz, bandes mobiles, faisceaux
+  hertziens ; tableau des bandes. Accessible par l'onglet *Spectre* du panneau de zone et le bouton *Spectre* de la carte.
 - **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`, et les filtres :
   `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`,
   et la zone : `zone=<lat>,<lon>,<rayon en m>&zl=<libellé>`.

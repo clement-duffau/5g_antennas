@@ -6,6 +6,8 @@
   import { bearing, direction, distance, fmtDistance } from '../geo'
   import { GENERATIONS, MOBILE_OPS, opColor } from '../colors'
   import { fmt, fmt1 } from '../format'
+  import ZoneSpectrum from '../charts/ZoneSpectrum.svelte'
+  import { occupation } from '../spectrum'
 
   let { index, services, zone, mask, filtered, onselect, onradius, onclose }: {
     index: SupportIndex
@@ -62,6 +64,14 @@
 
   const where = (i: number) => `${fmtDistance(dist[i])} ${direction(bearing(zone.lat, zone.lon, index.lat[i], index.lon[i]), true)}`
 
+  let tab = $state<'resume' | 'spectre'>('resume')
+  const occ = $derived.by(() => {
+    if (!services || tab !== 'spectre') return []
+    const m = new Uint8Array(index.n)
+    for (const i of inZone) m[i] = 1
+    return occupation(services, m, index.n)
+  })
+
   let limit = $state(25)
   $effect(() => { void zone; limit = 25 })
 </script>
@@ -83,10 +93,25 @@
     {/each}
   </div>
 
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected={tab === 'resume'} onclick={() => (tab = 'resume')}>Résumé</button>
+    <button role="tab" aria-selected={tab === 'spectre'} onclick={() => (tab = 'spectre')}>Spectre</button>
+  </div>
+
   <p class="headline">
     <strong class="num">{fmt(inZone.length)}</strong> support{inZone.length > 1 ? 's' : ''} dans un rayon de {fmtDistance(zone.r)}{filtered ? ', selon les filtres actifs' : ''}.
   </p>
 
+  {#if tab === 'spectre'}
+    <section>
+      <h3>Occupation des fréquences</h3>
+      {#if services}
+        <ZoneSpectrum {occ} compact />
+      {:else}
+        <p class="hint">Chargement des bandes…</p>
+      {/if}
+    </section>
+  {:else}
   <section>
     <h3>Réseaux mobiles</h3>
     {#if parOperateur}
@@ -141,6 +166,7 @@
       <p class="hint">Aucun support dans ce rayon. Élargissez-le ou allégez les filtres.</p>
     {/if}
   </section>
+  {/if}
 </aside>
 
 <style>
@@ -154,6 +180,9 @@
   .radii button { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: none; color: var(--text-2); cursor: pointer; font-size: 0.84rem; }
   .radii button[aria-checked='true'] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
   .headline { color: var(--text-2); }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+  .tabs button { background: none; border: 0; padding: 6px 8px; color: var(--text-2); cursor: pointer; font-size: 0.9rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button[aria-selected='true'] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
   .headline strong { color: var(--text); font-size: 1.25rem; font-weight: 640; }
   .scroller { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
