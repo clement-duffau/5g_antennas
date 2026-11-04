@@ -114,7 +114,8 @@ def write_index(con: duckdb.DuckDBPyConnection, out: Path, write_json: WriteJson
         v = cols[k]
         cols[k] = [v[0]] + [v[i] - v[i - 1] for i in range(1, len(v))] if v else v
 
-    noms = dict(con.execute("SELECT insee, nom FROM communes").fetchall())
+    # Nom et centre (geo.api.gouv.fr) de chaque commune : recherche « autour de moi » sans réseau.
+    ref = {r[0]: r[1:] for r in con.execute("SELECT insee, nom, lat, lon FROM communes").fetchall()}
     write_json(out / "supports.json", {
         "version": 1,
         "n": len(rows),
@@ -122,7 +123,9 @@ def write_index(con: duckdb.DuckDBPyConnection, out: Path, write_json: WriteJson
         "echelles": {"lat": 1e-5, "lon": 1e-5, "h": 0.1, "mois_origine": "1980-01"},
         "dictionnaires": {
             "nat": natures, "tpo": proprios,
-            "com": [[c, noms.get(c, c)] for c in communes],
+            "com": [[c, ref.get(c, (c,))[0],
+                     *(round(x, 4) if x is not None else None for x in ref.get(c, (c, None, None))[1:])]
+                    for c in communes],
             "ops": [*MOBILE_OPS, "Autres exploitants"],
             "gen": list(GENERATIONS),
             "fam": familles,
