@@ -129,3 +129,36 @@ def test_frequences(con):
     assert rows[4] == (18000.0, 19000.0, "ok")
     assert rows[5][2] == "vide"
     assert rows[6][2] == "suspecte"
+
+
+def test_export_index_et_details(con, tmp_path):
+    import json
+    from pipeline import export, stats
+
+    stats.prepare(con)
+    written = {}
+
+    def write_json(path, data, quiet=False):
+        written[path.name if path.parent.name != "detail" else f"detail/{path.name}"] = data
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, default=str), encoding="utf-8")
+
+    export.write_index(con, tmp_path, write_json)
+    export.write_details(con, tmp_path, write_json)
+
+    idx = written["supports.json"]
+    cols = idx["colonnes"]
+    for k in idx["deltas"]:  # décodage différentiel, comme le front
+        for i in range(1, len(cols[k])):
+            cols[k][i] += cols[k][i - 1]
+    assert idx["n"] == 2
+    i1 = cols["id"].index(1)
+    assert cols["lat"][i1] == round((48 + 6 / 60 + 36 / 3600) * 1e5)
+    assert idx["dictionnaires"]["ops"][:4] == ["Orange", "Bouygues Telecom", "SFR", "Free"]
+    assert cols["ops"][i1] == 0b00101                        # Orange (bit 0) et SFR (bit 2)
+    assert cols["gen"][i1] == 0b1100                         # 4G et 5G (une date invalide n'exclut pas l'émetteur)
+    assert set(written) >= {"detail/35.json", "detail/75.json"}
+    fiche = written["detail/35.json"]["1"]
+    assert {s["grp"] for s in fiche["st"]} == {"Orange", "SFR"}
+    emr = next(s for s in fiche["st"] if s["grp"] == "Orange")["emr"][0]
+    assert emr["s"] == "LTE 800" and emr["b"] == [[791.0, 801.0], [832.0, 842.0]]

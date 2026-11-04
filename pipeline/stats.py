@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import duckdb
 
-MOBILE_OPS = ("Orange", "SFR", "Bouygues Telecom", "Free")
+# Même ordre que le front (site/src/lib/colors.ts) : il fixe les bits de l'index et les couleurs.
+MOBILE_OPS = ("Orange", "Bouygues Telecom", "SFR", "Free")
 GENERATIONS = ("2G", "3G", "4G", "5G")
 
 
@@ -28,15 +29,16 @@ def prepare(con: duckdb.DuckDBPyConnection) -> None:
         JOIN stations st USING (sta)
         JOIN (SELECT sta, min(sup_id) AS sup_id FROM support_station GROUP BY sta) ss USING (sta);
 
+        -- Une station peut être sur plusieurs supports : on rattache ses émetteurs à chacun.
         CREATE OR REPLACE TABLE support_ops AS
-        SELECT sup_id,
+        SELECT ss.sup_id,
                list(DISTINCT groupe ORDER BY groupe) AS groupes,
                count(DISTINCT groupe) AS n_groupes,
                count(DISTINCT groupe) FILTER (WHERE mobile) AS n_mobiles,
                count(*) AS n_emetteurs,
                bool_or(mobile AND generation = '5G') AS a_5g,
                bool_or(mobile AND generation = '4G') AS a_4g
-        FROM emr_full GROUP BY sup_id;
+        FROM emr_full e JOIN support_station ss ON ss.sta = e.sta GROUP BY ss.sup_id;
     """)
 
 

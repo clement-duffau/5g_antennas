@@ -25,11 +25,12 @@ def _json_default(o: object) -> object:
     raise TypeError(f"non sérialisable : {type(o)}")
 
 
-def write_json(path: Path, data: object) -> None:
+def write_json(path: Path, data: object, quiet: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":"), default=_json_default),
                     encoding="utf-8")
-    print(f"  {path.name} : {path.stat().st_size / 1e3:,.0f} Ko")
+    if not quiet:
+        print(f"  {path.name} : {path.stat().st_size / 1e3:,.0f} Ko")
 
 
 def cmd_build(args: argparse.Namespace) -> int:
