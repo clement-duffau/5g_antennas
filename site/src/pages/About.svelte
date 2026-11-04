@@ -59,6 +59,9 @@
       <li>Hauteurs nulles ou négatives écartées : {fmt(q.supports_hauteur_invalide ?? 0)} supports.</li>
       <li>Rattachement communal : {fmt(q.rattachement_direct ?? 0)} supports directement, {fmt(q.rattachement_arrondissement ?? 0)} via un arrondissement municipal,
         {fmt(q.rattachement_commune_la_plus_proche ?? 0)} au centre de commune le plus proche (anciennes communes fusionnées).</li>
+      <li>Frise : la carte et les courbes cumulées utilisent la date de première mise en service, sur chaque support, d'un
+        système de l'opérateur (parc actuel ; un site démonté n'y figure pas). Les courbes « archive par archive » comptent
+        le parc déclaré dans chaque extraction mensuelle de l'ANFR depuis septembre 2018, démontages compris.</li>
       <li>Exploitants regroupés par groupe (par exemple ORANGE et ORANGE service fixe) ; le libellé ANFR d'origine reste visible.</li>
     </ul>
 

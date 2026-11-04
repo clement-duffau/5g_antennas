@@ -24,8 +24,9 @@ def detect_encoding(raw: bytes) -> str:
         return "cp1252"
 
 
-def extract(zips: list[Path], key: str, cache_dir: Path = CACHE_DIR) -> dict[str, Path]:
-    """Extrait les tables SUP_* en UTF-8 dans cache_dir/key/. Retourne {table: chemin}."""
+def extract(zips: list[Path], key: str, cache_dir: Path = CACHE_DIR,
+            tables: tuple[str, ...] = TABLES) -> dict[str, Path]:
+    """Extrait les tables SUP_* demandées en UTF-8 dans cache_dir/key/. Retourne {table: chemin}."""
     out_dir = cache_dir / key
     out_dir.mkdir(parents=True, exist_ok=True)
     found: dict[str, Path] = {}
@@ -33,7 +34,7 @@ def extract(zips: list[Path], key: str, cache_dir: Path = CACHE_DIR) -> dict[str
         with zipfile.ZipFile(z) as zf:
             for name in zf.namelist():
                 stem = Path(name).stem.upper()
-                if stem not in TABLES or not re.search(r"\.(txt|csv)$", name, re.I):
+                if stem not in tables or not re.search(r"\.(txt|csv)$", name, re.I):
                     continue
                 dest = out_dir / f"{stem}.txt"
                 if not dest.exists():
@@ -45,7 +46,7 @@ def extract(zips: list[Path], key: str, cache_dir: Path = CACHE_DIR) -> dict[str
                     if enc != "utf-8":
                         print(f"  {stem} : converti depuis {enc}")
                 found[stem] = dest
-    missing = [t for t in TABLES if t not in found]
+    missing = [t for t in tables if t not in found]
     if missing:
         raise FileNotFoundError(f"tables manquantes dans l'archive : {missing}")
     return found

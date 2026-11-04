@@ -1,0 +1,125 @@
+{
+ "emetteurs": 2086018,
+ "extraction": "20230929",
+ "sites": {
+  "Bouygues Telecom": {
+   "2G": 22744,
+   "3G": 28709,
+   "4G": 28754,
+   "5G": 15850,
+   "total": 28954
+  },
+  "Free": {
+   "2G": 22,
+   "3G": 28203,
+   "4G": 28182,
+   "5G": 22490,
+   "total": 28212
+  },
+  "Orange": {
+   "2G": 19206,
+   "3G": 30653,
+   "4G": 31576,
+   "5G": 10981,
+   "total": 31630
+  },
+  "SFR": {
+   "2G": 21916,
+   "3G": 27477,
+   "4G": 27421,
+   "5G": 13843,
+   "total": 27586
+  }
+ },
+ "supports": 86011,
+ "systemes": {
+  "5G NR 2100": {
+   "Bouygues Telecom": 44923,
+   "Orange": 1132,
+   "SFR": 30193,
+   "total": 76248
+  },
+  "5G NR 3500": {
+   "Bouygues Telecom": 30783,
+   "Free": 19842,
+   "Orange": 31285,
+   "SFR": 29187,
+   "total": 111097
+  },
+  "5G NR 700": {
+   "Free": 65228,
+   "Orange": 3,
+   "total": 65231
+  },
+  "GSM 1800": {
+   "Bouygues Telecom": 3307,
+   "Orange": 1193,
+   "SFR": 1258,
+   "total": 5758
+  },
+  "GSM 900": {
+   "Bouygues Telecom": 63151,
+   "Free": 68,
+   "Orange": 51998,
+   "SFR": 60765,
+   "total": 175982
+  },
+  "LTE 1800": {
+   "Bouygues Telecom": 58508,
+   "Free": 66953,
+   "Orange": 68345,
+   "SFR": 56059,
+   "autres": 3,
+   "total": 249868
+  },
+  "LTE 2100": {
+   "Bouygues Telecom": 47972,
+   "Free": 63615,
+   "Orange": 51184,
+   "SFR": 48207,
+   "total": 210978
+  },
+  "LTE 2600": {
+   "Bouygues Telecom": 40944,
+   "Free": 64401,
+   "Orange": 38475,
+   "SFR": 38539,
+   "autres": 2,
+   "total": 182361
+  },
+  "LTE 700": {
+   "Bouygues Telecom": 52043,
+   "Free": 79520,
+   "Orange": 62955,
+   "SFR": 39253,
+   "autres": 58,
+   "total": 233829
+  },
+  "LTE 800": {
+   "Bouygues Telecom": 78488,
+   "Orange": 85476,
+   "SFR": 75176,
+   "autres": 2,
+   "total": 239142
+  },
+  "UMTS 2100": {
+   "Bouygues Telecom": 10069,
+   "Free": 7481,
+   "Orange": 5209,
+   "SFR": 20928,
+   "autres": 2,
+   "total": 43689
+  },
+  "UMTS 900": {
+   "Bouygues Telecom": 78354,
+   "Free": 80567,
+   "Orange": 84856,
+   "SFR": 75393,
+   "autres": 2,
+   "total": 319172
+  }
+ },
+ "systemes_non_references": [
+  "LTE 1400 Expe"
+ ]
+}

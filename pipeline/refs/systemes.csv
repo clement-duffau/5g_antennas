@@ -64,3 +64,10 @@ EM/REC,Autre,,,,,Émission / réception
 ANM,Autre,,,,,
 ANA,Autre,,,,,
 TROPO,Autre,,,,,Liaison transhorizon (troposphérique)
+GSM 900/GSM 1800,Mobile,2G,900/1800 MHz,869,1880,GSM bi-bande (anciennes déclarations)
+GSM 1800/GSM 900,Mobile,2G,900/1800 MHz,869,1880,GSM bi-bande (anciennes déclarations)
+UMTS 2100/UMTS 900,Mobile,3G,900/2100 MHz,869,2170,UMTS bi-bande (anciennes déclarations)
+5G NR 3400-3800 Expe,Expérimentation,5G,3500 MHz,3400,3800,Expérimentation NR 3400-3800 MHz (2018-2020)
+REC/GONIO,Maritime et aéronautique,,,,,Réception / radiogoniométrie
+ANT,Autre,,,,,
+LTE 1400 Expe,Expérimentation,4G,1400 MHz,1427,1518,Expérimentation LTE bande L

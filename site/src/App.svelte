@@ -5,6 +5,7 @@
   import About from './pages/About.svelte'
   // La carte (MapLibre, ~1 Mo) n'est chargée que si l'on ouvre la page Carte.
   const loadMap = () => import('./pages/MapPage.svelte')
+  const loadFrise = () => import('./pages/Frise.svelte')
 
   $effect(() => { applyTheme() })
 
@@ -52,6 +53,8 @@
     <About />
   {:else if route.path === 'statistiques'}
     <Stats />
+  {:else if route.path === 'frise'}
+    {#await loadFrise() then F}<F.default />{/await}
   {:else}
     {#await loadMap() then M}<M.default />{/await}
   {/if}

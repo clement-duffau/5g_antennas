@@ -20,7 +20,7 @@ Les données sont régénérées chaque mois par une GitHub Action, puis le site
 | 2 | Carte des supports et fiche support | fait |
 | 3 | Filtres combinables | fait |
 | 4 | Recherche « autour de moi » | fait |
-| 5 | Frise du déploiement (avec les archives depuis 2018) | à faire |
+| 5 | Frise du déploiement (avec les archives depuis 2018) | fait |
 | 6 | Spectre d'une zone | à faire |
 | 7 | Finitions, page À propos complète | en partie (page À propos déjà en ligne) |
 
@@ -53,6 +53,8 @@ une minute une fois les fichiers téléchargés.
 | `python -m pipeline build --extraction 20260831` | une extraction précise (AAAAMMJJ) |
 | `python -m pipeline build --zip data.zip ref.zip --date 2026-09-30` | archives déjà téléchargées, sans réseau ANFR |
 | `python -m pipeline build --refresh-geo` | re-télécharge le référentiel communes |
+| `python -m pipeline build --history` | calcule aussi les mois d'archive absents de `data/history/` |
+| `python -m pipeline history --limit 12` | seulement les archives (au plus 12 mois), sans reconstruire le site |
 | `python -m pytest tests` | tests du nettoyage sur un mini-jeu synthétique |
 | `python scripts/explore.py` | régénère le rapport brut `docs/data-exploration-annexe.md` |
 
@@ -76,6 +78,7 @@ pipeline/                 Python + DuckDB
   stats.py                stats.json
   export.py               supports.json (index de la carte), detail/<dep>.json (fiches), référentiels
   geo.py                  contours des départements (Etalab, repli france-geojson)
+  history.py              agrégats mensuels des archives ANFR (data/history/<AAAAMMJJ>.json) et history.json
   refs/systemes.csv       système ANFR -> famille, génération, bande, fenêtre de fréquences attendue
   refs/exploitants.csv    libellé ANFR -> groupe, catégorie
 site/                     Vite + Svelte 5 + TypeScript, sans backend
@@ -97,6 +100,7 @@ tests/                    tests pytest du nettoyage
 | `supports.json` | index en colonnes des ~93 000 supports : position, hauteur, nature, propriétaire, commune, masques de bits opérateurs / générations / familles, dates | 5 Mo / 1,5 Mo |
 | `services.json` + `services.bin.gz` | une ligne par support × exploitant × système (880 000) : mois de 1re mise en service, jeu de bandes (dictionnaire de 4 170 jeux) ; colonnes binaires décompressées dans le navigateur (`DecompressionStream`) | 0,3 Mo + 1,5 Mo |
 | `detail/<dep>.json` | fiches complètes d'un département : stations, émetteurs (système, bandes, date), antennes (type, azimut, hauteur) ; chargées au clic | 0,3 à 5,5 Mo / 40 à 700 Ko |
+| `history.json` | séries mensuelles des archives depuis 2018 : supports, émetteurs, sites par opérateur et génération, émetteurs par système | ~50 Ko |
 | `departements.geojson` | contours simplifiés | 0,2 Mo / 70 Ko |
 | `communes.json`, `departements.json` | référentiels (recherche, classements) | 2 Mo / 0,7 Mo |
 
@@ -128,6 +132,11 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
   appelé depuis le navigateur, ou position de l'appareil. La zone (centre + rayon de 500 m à 10 km) est un filtre
   de plus, combinable avec les autres ; le panneau donne, par opérateur, le site le plus proche et le site 5G le
   plus proche (distance, direction), les sites 2G à 5G dans le rayon et la liste des supports par distance.
+- **Frise.** La carte animée et les courbes cumulées viennent des dates de mise en service de la table des
+  services (parc actuel, au mois près) ; l'animation ne fait que déplacer un filtre MapLibre. Les courbes
+  « archive par archive » viennent des agrégats mensuels de `data/history/`, qui montrent aussi les démontages
+  (extinction 2G/3G, refarming). Ces agrégats (~2 Ko par mois) sont **commités** : le workflow de déploiement
+  calcule les mois manquants et les enregistre sur `main`, pour ne pas retélécharger 6 Go d'archives à chaque fois.
 - **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`, et les filtres :
   `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`,
   et la zone : `zone=<lat>,<lon>,<rayon en m>&zl=<libellé>`.

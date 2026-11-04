@@ -3,6 +3,8 @@
     python -m pipeline build                    # dernière extraction publiée
     python -m pipeline build --extraction 20260831
     python -m pipeline build --zip data.zip ref.zip --date 2026-09-30   # hors ligne
+    python -m pipeline build --history          # + mois d'archive manquants (data/history/)
+    python -m pipeline history --limit 12       # seulement les archives
 """
 from __future__ import annotations
 
@@ -15,7 +17,7 @@ from pathlib import Path
 
 import duckdb
 
-from . import clean, communes, export, fetch, load, stats
+from . import clean, communes, export, fetch, history, load, stats
 from .config import CACHE_DIR, DATASET_PAGE, OUT_DIR
 
 
@@ -77,6 +79,15 @@ def cmd_build(args: argparse.Namespace) -> int:
     write_json(out / "meta.json", meta_site)
     write_json(out / "stats.json", {"meta": meta_site, **stats.build(con)})
     export.write_all(con, out, write_json)
+
+    # Historique : agrégat du mois courant (mêmes définitions que les archives), mois manquants, séries.
+    history.save(key, history.aggregate(con))
+    con.close()
+    if args.history:
+        history.compute_missing(limit=args.history_limit)
+    series = history.assemble()
+    if series:
+        write_json(out / "history.json", series)
     print(f"terminé en {time.time() - t0:.0f} s")
     return 0
 
@@ -90,7 +101,15 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--date", help="date d'extraction AAAA-MM-JJ (avec --zip)")
     b.add_argument("--out", default=str(OUT_DIR), help="dossier de sortie")
     b.add_argument("--refresh-geo", action="store_true", help="re-télécharger le référentiel communes")
+    b.add_argument("--history", action="store_true",
+                   help="calculer aussi les mois d'archive absents de data/history/ (téléchargements)")
+    b.add_argument("--history-limit", type=int, help="nombre maximal de mois d'archive à calculer")
     b.set_defaults(func=cmd_build)
+
+    h = sub.add_parser("history", help="calcule les agrégats des archives mensuelles manquantes")
+    h.add_argument("--limit", type=int, help="nombre maximal de mois à calculer")
+    h.add_argument("--keep-raw", action="store_true", help="conserver les archives téléchargées")
+    h.set_defaults(func=lambda a: (history.compute_missing(a.limit, a.keep_raw), 0)[1])
     args = ap.parse_args(argv)
     return args.func(args)
 
