@@ -34,6 +34,15 @@
   --seq-4: #6da7ec;
   --seq-5: #b7d3f6;
 
+  /* Catégories de la carte (palette catégorielle validée, ordre figé). */
+  --cat-1: #3987e5;
+  --cat-2: #199e70;
+  --cat-3: #c98500;
+  --cat-4: #d55181;
+  --cat-5: #9085e9;
+  --cat-6: #d95926;
+  --cat-7: #7d8996;
+
   --radius: 6px;
   --gutter: clamp(16px, 4vw, 40px);
   --maxw: 1240px;
@@ -69,6 +78,13 @@
     --seq-3: #5598e7;
     --seq-4: #256abf;
     --seq-5: #104281;
+    --cat-1: #2a78d6;
+    --cat-2: #1baf7a;
+    --cat-3: #eda100;
+    --cat-4: #e87ba4;
+    --cat-5: #6250d6;
+    --cat-6: #eb6834;
+    --cat-7: #8b97a3;
   }
 }
 :root[data-theme="light"] {
@@ -99,6 +115,13 @@
   --seq-3: #5598e7;
   --seq-4: #256abf;
   --seq-5: #104281;
+  --cat-1: #2a78d6;
+  --cat-2: #1baf7a;
+  --cat-3: #eda100;
+  --cat-4: #e87ba4;
+  --cat-5: #6250d6;
+  --cat-6: #eb6834;
+  --cat-7: #8b97a3;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

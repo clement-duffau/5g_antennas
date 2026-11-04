@@ -3,6 +3,8 @@
   import { theme, applyTheme } from './lib/theme.svelte'
   import Stats from './pages/Stats.svelte'
   import About from './pages/About.svelte'
+  // La carte (MapLibre, ~1 Mo) n'est chargée que si l'on ouvre la page Carte.
+  const loadMap = () => import('./pages/MapPage.svelte')
 
   $effect(() => { applyTheme() })
 
@@ -45,14 +47,17 @@
   </div>
 </header>
 
-<main id="contenu">
+<main id="contenu" class:full={route.path === 'carte'}>
   {#if route.path === 'a-propos'}
     <About />
-  {:else}
+  {:else if route.path === 'statistiques'}
     <Stats />
+  {:else}
+    {#await loadMap() then M}<M.default />{/await}
   {/if}
 </main>
 
+{#if route.path !== 'carte'}
 <footer>
   <div class="foot"><p>
     Données : <a href="https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-radioelectriques-de-plus-de-5-watts-1/">ANFR, installations radioélectriques de plus de 5 W</a>
@@ -60,6 +65,7 @@
     <a href="#/a-propos">Méthodologie</a>.
   </p></div>
 </footer>
+{/if}
 
 <style>
   .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: var(--accent-ink); padding: 8px 12px; z-index: 50; border-radius: var(--radius); }
@@ -71,6 +77,8 @@
     border-bottom: 1px solid var(--line);
   }
   .inner, main, footer { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+  main.full { max-width: none; padding: 0; }
+  .top .inner { max-width: none; }
   .inner { display: flex; align-items: center; gap: 24px; height: 56px; }
   .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 640; font-stretch: 115%; white-space: nowrap; }
   .brand svg { color: var(--accent); }

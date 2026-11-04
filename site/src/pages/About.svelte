@@ -22,6 +22,8 @@
       « Données sur les installations radioélectriques de plus de 5 watts »</a> de l'Agence nationale des fréquences (ANFR),
       publié chaque mois sur data.gouv.fr sous <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/">Licence Ouverte 2.0</a>.
       Les populations et superficies communales viennent de <a href="https://geo.api.gouv.fr/">geo.api.gouv.fr</a>.
+      Le fond de carte est fourni par <a href="https://openfreemap.org/">OpenFreeMap</a>
+      (© OpenMapTiles, données © <a href="https://www.openstreetmap.org/copyright">contributeurs OpenStreetMap</a>).
     </p>
 
     <h2>Ce que les données ne contiennent pas</h2>
@@ -45,7 +47,8 @@
 
     <h2>Traitements appliqués</h2>
     <ul>
-      <li>Coordonnées converties de degrés-minutes-secondes en degrés décimaux (WGS84) ; précision d'une seconde d'arc, soit environ 30 m.</li>
+      <li>Coordonnées converties de degrés-minutes-secondes en degrés décimaux (WGS84) ; précision d'une seconde d'arc, soit environ 30 m.
+        Sur la carte, un point peut donc être décalé de quelques dizaines de mètres par rapport au pylône réel.</li>
       <li>La table SUP_SUPPORT associe supports et stations ; elle est dédoublonnée par identifiant de support.</li>
       <li>Fréquences converties en MHz. Les erreurs d'unité manifestes (facteur 1000) sont corrigées en comparant à la bande attendue du système :
         {fmt(q['bandes_unité_corrigée'] ?? 0)} bandes corrigées, {fmt(q.bandes_suspecte ?? 0)} incohérentes conservées mais signalées, {fmt(q.bandes_vide ?? 0)} sans fréquence.</li>

@@ -15,7 +15,7 @@ Les données sont régénérées chaque mois par une GitHub Action, puis le site
 | Étape | Contenu | État |
 |---|---|---|
 | 1 | Pipeline, statistiques, page Statistiques, déploiement | fait |
-| 2 | Carte des supports et fiche support | à faire |
+| 2 | Carte des supports et fiche support | fait |
 | 3 | Filtres combinables | à faire |
 | 4 | Recherche « autour de moi » | à faire |
 | 5 | Frise du déploiement (avec les archives depuis 2018) | à faire |
@@ -72,17 +72,34 @@ pipeline/                 Python + DuckDB
   clean.py                nettoyage : supports dédoublonnés, DMS -> WGS84, unités de fréquence,
                           dates, rattachement communal, indicateurs de qualité
   stats.py                stats.json
-  export.py               communes.json, departements.json (puis index de la carte, détails…)
+  export.py               supports.json (index de la carte), detail/<dep>.json (fiches), référentiels
+  geo.py                  contours des départements (Etalab, repli france-geojson)
   refs/systemes.csv       système ANFR -> famille, génération, bande, fenêtre de fréquences attendue
   refs/exploitants.csv    libellé ANFR -> groupe, catégorie
 site/                     Vite + Svelte 5 + TypeScript, sans backend
-  src/pages/              Statistiques, À propos
+  src/pages/              Carte, Statistiques, À propos
+  src/lib/map/            carte MapLibre (points, groupes, densité) et fiche support
+  src/lib/supports.ts     décodage de l'index des supports en tableaux typés
   src/lib/charts/         graphiques SVG faits main (spectre, barres, colonnes, rose des azimuts)
   src/lib/ui/             tableau triable, sections, puces de filtre, infobulle
 docs/                     exploration des données (synthèse + annexe générée)
 tests/                    tests pytest du nettoyage
 .github/workflows/        ci.yml (tests + build), deploy.yml (données mensuelles + Pages)
 ```
+
+### Fichiers produits (`site/public/data/`)
+
+| Fichier | Contenu | Taille (brut / gzip) |
+|---|---|---|
+| `stats.json` | statistiques nationales précalculées | 0,2 Mo / 30 Ko |
+| `supports.json` | index en colonnes des ~93 000 supports : position, hauteur, nature, propriétaire, commune, masques de bits opérateurs / générations / familles, dates | 5 Mo / 1,5 Mo |
+| `detail/<dep>.json` | fiches complètes d'un département : stations, émetteurs (système, bandes, date), antennes (type, azimut, hauteur) ; chargées au clic | 0,3 à 5,5 Mo / 40 à 700 Ko |
+| `departements.geojson` | contours simplifiés | 0,2 Mo / 70 Ko |
+| `communes.json`, `departements.json` | référentiels (recherche, classements) | 2 Mo / 0,7 Mo |
+
+Dans `supports.json`, les colonnes `id`, `lat`, `lon` et `com` sont encodées en différences (tri par commune),
+ce qui réduit d'environ 20 % la taille compressée. Les émetteurs identiques d'une station (même système, même
+date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tient en une ligne par système.
 
 ### Choix techniques
 
@@ -95,7 +112,10 @@ tests/                    tests pytest du nettoyage
 - **Aucune donnée générée n'est commitée.** Les archives brutes (`data/raw/`), le cache et `site/public/data/`
   sont ignorés par git ; la CI les reconstruit et publie le résultat comme artefact GitHub Pages.
 - **Svelte 5** pour un front léger et réactif. Les graphiques sont écrits à la main en SVG
-  (~32 Ko gzip de JavaScript pour tout le site à ce stade).
+  (~34 Ko gzip de JavaScript hors carte). MapLibre (~280 Ko gzip) n'est chargé qu'à l'ouverture de la carte.
+- **Fond de carte OpenFreeMap** (tuiles vectorielles OpenStreetMap, sans clé d'API), styles *dark* et *positron*
+  selon le thème. S'il est inaccessible, la carte se rabat sur les contours des départements.
+- **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`.
 
 ## Déploiement
 
@@ -108,6 +128,10 @@ tests/                    tests pytest du nettoyage
 - ANFR, [Données sur les installations radioélectriques de plus de 5 watts](https://www.data.gouv.fr/fr/datasets/donnees-sur-les-installations-radioelectriques-de-plus-de-5-watts-1/),
   Licence Ouverte 2.0.
 - [geo.api.gouv.fr](https://geo.api.gouv.fr/) (populations et superficies communales).
+- Contours des départements : [Etalab / IGN](https://github.com/etalab/contours-administratifs), ou à défaut
+  [france-geojson](https://github.com/gregoiredavid/france-geojson) (dérivé IGN).
+- Fond de carte : [OpenFreeMap](https://openfreemap.org/), © [OpenMapTiles](https://www.openmaptiles.org/),
+  données © [contributeurs OpenStreetMap](https://www.openstreetmap.org/copyright).
 
 Les limites et traitements des données sont décrits dans [`docs/data-exploration.md`](docs/data-exploration.md)
 et sur la page *À propos* du site.
