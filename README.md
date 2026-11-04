@@ -6,6 +6,8 @@ France métropolitaine : supports (pylônes, toits, châteaux d'eau…), exploit
 
 Les données sont régénérées chaque mois par une GitHub Action, puis le site est publié sur GitHub Pages.
 
+![Aperçu de la page Statistiques](docs/apercu-statistiques.png)
+
 > Le jeu ANFR exclut les installations de l'Aviation civile, de la Défense et du ministère de l'Intérieur.
 
 ## État d'avancement
