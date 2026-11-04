@@ -17,4 +17,7 @@ const GEN_VAR: Record<string, string> = {
 export const genColor = (g: string) => GEN_VAR[g] ?? 'var(--op-autre)'
 
 /** Index 0..5 de la rampe séquentielle pour une valeur t dans [0, 1]. */
-export const seqColor = (t: number) => `var(--seq-${Math.max(0, Math.min(5, Math.round(t * 5)))})`
+const seqStep = (t: number) => Math.max(0, Math.min(5, Math.round(t * 5)))
+export const seqColor = (t: number) => `var(--seq-${seqStep(t)})`
+/** Couleur de texte lisible sur seqColor(t), selon le thème. */
+export const seqInk = (t: number) => `var(--on-seq-${seqStep(t)})`

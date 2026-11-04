@@ -30,17 +30,18 @@
   const innerH = $derived(height - m.top - m.bottom)
 
   const totals = $derived(values.map((v) => series.reduce((s, se) => s + (v[se.key] ?? 0), 0)))
-  const yMax = $derived(niceMax(Math.max(1, ...totals)))
+  const yStep = $derived(niceStep(Math.max(1, ...totals) / 4))
+  const yMax = $derived(Math.max(yStep, Math.ceil(Math.max(1, ...totals) / yStep) * yStep))
   const band = $derived(innerW / Math.max(1, categories.length))
   const barW = $derived(Math.min(24, Math.max(2, band - 2)))
   const y = (v: number) => innerH - (v / yMax) * innerH
-  const ticks = $derived([0, 0.25, 0.5, 0.75, 1].map((t) => t * yMax))
+  const ticks = $derived(Array.from({ length: Math.round(yMax / yStep) + 1 }, (_, k) => k * yStep))
   const every = $derived(tickEvery || Math.max(1, Math.ceil(categories.length / Math.max(1, Math.floor(innerW / 44)))))
 
-  function niceMax(v: number) {
+  function niceStep(v: number) {
     const p = 10 ** Math.floor(Math.log10(v))
-    for (const k of [1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (k * p >= v) return k * p
-    return v
+    for (const k of [1, 2, 2.5, 5, 10]) if (k * p >= v) return k * p
+    return 10 * p
   }
 
   /** Rectangle à coins supérieurs arrondis (bout de donnée), base carrée. */

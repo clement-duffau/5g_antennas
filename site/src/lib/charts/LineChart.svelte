@@ -31,15 +31,17 @@
   const m = $derived({ top: 12, right: endLabels && series.length > 1 ? 86 : 12, bottom: 26, left: 46 })
   const iw = $derived(Math.max(10, width - m.left - m.right))
   const ih = $derived(height - m.top - m.bottom)
-  const yMax = $derived(nice(Math.max(1, ...series.flatMap((s) => s.values.filter((v): v is number => v != null)))))
+  // Pas « rond » (1, 2, 2,5, 5 × 10^n) pour environ 4 intervalles, puis maximum arrondi au pas.
+  const yStep = $derived(niceStep(Math.max(1, ...series.flatMap((s) => s.values.filter((v): v is number => v != null))) / 4))
+  const yMax = $derived(Math.max(yStep, Math.ceil(Math.max(1, ...series.flatMap((s) => s.values.filter((v): v is number => v != null))) / yStep) * yStep))
   const x = (i: number) => (xs.length > 1 ? (i / (xs.length - 1)) * iw : iw / 2)
   const y = (v: number) => ih - (v / yMax) * ih
-  const yTicks = $derived([0, 0.25, 0.5, 0.75, 1].map((t) => t * yMax))
+  const yTicks = $derived(Array.from({ length: Math.round(yMax / yStep) + 1 }, (_, k) => k * yStep))
 
-  function nice(v: number) {
+  function niceStep(v: number) {
     const p = 10 ** Math.floor(Math.log10(v))
-    for (const k of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (k * p >= v) return k * p
-    return v
+    for (const k of [1, 2, 2.5, 5, 10]) if (k * p >= v) return k * p
+    return 10 * p
   }
   function path(vals: (number | null)[]) {
     let d = '', pen = false

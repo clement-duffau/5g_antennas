@@ -33,6 +33,13 @@
   --seq-3: #3987e5;
   --seq-4: #6da7ec;
   --seq-5: #b7d3f6;
+  /* Texte posé sur chaque teinte de la rampe (contraste ≥ 4,5:1, calculé). */
+  --on-seq-0: #e9eef3;
+  --on-seq-1: #ffffff;
+  --on-seq-2: #ffffff;
+  --on-seq-3: #0d1722;
+  --on-seq-4: #0d1722;
+  --on-seq-5: #0d1722;
 
   /* Catégories de la carte (palette catégorielle validée, ordre figé). */
   --cat-1: #3987e5;
@@ -59,7 +66,7 @@
     --line-strong: #bcc7d2;
     --text: #0f1b27;
     --text-2: #3f4d5b;
-    --muted: #66737f;
+    --muted: #5b6773;
     --accent: #1c5cab;
     --accent-ink: #ffffff;
     --focus: #1c5cab;
@@ -78,6 +85,18 @@
     --seq-3: #5598e7;
     --seq-4: #256abf;
     --seq-5: #104281;
+  --on-seq-0: #0d1722;
+  --on-seq-1: #0d1722;
+  --on-seq-2: #0d1722;
+  --on-seq-3: #0d1722;
+  --on-seq-4: #ffffff;
+  --on-seq-5: #ffffff;
+    --on-seq-0: #0d1722;
+    --on-seq-1: #0d1722;
+    --on-seq-2: #0d1722;
+    --on-seq-3: #0d1722;
+    --on-seq-4: #ffffff;
+    --on-seq-5: #ffffff;
     --cat-1: #2a78d6;
     --cat-2: #1baf7a;
     --cat-3: #eda100;
@@ -96,7 +115,7 @@
   --line-strong: #bcc7d2;
   --text: #0f1b27;
   --text-2: #3f4d5b;
-  --muted: #66737f;
+  --muted: #5b6773;
   --accent: #1c5cab;
   --accent-ink: #ffffff;
   --focus: #1c5cab;
@@ -115,6 +134,12 @@
   --seq-3: #5598e7;
   --seq-4: #256abf;
   --seq-5: #104281;
+  --on-seq-0: #0d1722;
+  --on-seq-1: #0d1722;
+  --on-seq-2: #0d1722;
+  --on-seq-3: #0d1722;
+  --on-seq-4: #ffffff;
+  --on-seq-5: #ffffff;
   --cat-1: #2a78d6;
   --cat-2: #1baf7a;
   --cat-3: #eda100;
