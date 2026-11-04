@@ -162,3 +162,30 @@ def test_export_index_et_details(con, tmp_path):
     assert {s["grp"] for s in fiche["st"]} == {"Orange", "SFR"}
     emr = next(s for s in fiche["st"] if s["grp"] == "Orange")["emr"][0]
     assert emr["s"] == "LTE 800" and emr["b"] == [[791.0, 801.0], [832.0, 842.0]]
+
+
+def test_export_services_binaire(con, tmp_path):
+    import gzip
+    import json
+    import struct
+    from pipeline import export, stats
+
+    stats.prepare(con)
+    export.write_services(con, tmp_path, lambda p, d, quiet=False: p.write_text(json.dumps(d), encoding="utf-8"))
+    meta = json.loads((tmp_path / "services.json").read_text(encoding="utf-8"))
+    raw = gzip.decompress((tmp_path / "services.bin.gz").read_bytes())
+    n, m = meta["n"], meta["m"]
+    assert len(raw) == 2 * m + 2 * m + n + m + m
+    d = struct.unpack(f"<{m}H", raw[:2 * m])
+    bs = struct.unpack(f"<{m}H", raw[2 * m:4 * m])
+    cnt = list(raw[4 * m:4 * m + n])
+    grp = list(raw[4 * m + n:5 * m + n])
+    sy = list(raw[5 * m + n:])
+    assert sum(cnt) == m
+    D = meta["dictionnaires"]
+    lignes = {(D["grp"][g]["nom"], D["sys"][x]["nom"]): (mois, D["bandes"][b]) for g, x, mois, b in zip(grp, sy, d, bs)}
+    # support 1 (premier dans l'ordre INSEE 35238 < 75056) : Orange LTE 800 et SFR 5G NR 3500
+    assert cnt[0] == 2
+    assert lignes[("Orange", "LTE 800")] == ((2014 - 1980) * 12 + 3, [[791.0, 801.0], [832.0, 842.0]])
+    assert lignes[("SFR", "5G NR 3500")][0] == 0           # date future -> inconnue
+    assert D["sys"][sy[0]]["famille"] in {"Mobile"}

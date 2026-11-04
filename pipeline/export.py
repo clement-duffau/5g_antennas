@@ -7,7 +7,10 @@
 """
 from __future__ import annotations
 
+import gzip
 import json
+import sys
+from array import array
 from pathlib import Path
 from typing import Callable
 
@@ -25,6 +28,7 @@ GENERATIONS = ("2G", "3G", "4G", "5G")
 def write_all(con: duckdb.DuckDBPyConnection, out: Path, write_json: WriteJson) -> None:
     write_referentiels(con, out, write_json)
     write_index(con, out, write_json)
+    write_services(con, out, write_json)
     write_details(con, out, write_json)
     geo.write_departements(out / "departements.geojson")
 
@@ -124,6 +128,87 @@ def write_index(con: duckdb.DuckDBPyConnection, out: Path, write_json: WriteJson
             "fam": familles,
         },
         "colonnes": cols,
+    })
+
+
+def _month_sql(col: str) -> str:
+    """Mois depuis janvier 1980 (1 = 1980-01), 0 si inconnu : même codage que l'index."""
+    return f"coalesce((year({col}) - 1980) * 12 + month({col}), 0)"
+
+
+def write_services(con: duckdb.DuckDBPyConnection, out: Path, write_json: WriteJson) -> None:
+    """Table des services : une ligne par support × exploitant (groupe) × système, avec la date de première
+    mise en service et le jeu de bandes de fréquences. Elle permet des filtres croisés exacts côté client
+    (« Free en 5G NR 3500 mis en service depuis 2022 »).
+
+    Format : services.json (dictionnaires et disposition) + services.bin.gz, colonnes binaires little-endian
+    dans l'ordre des supports de supports.json :
+        d   u16[m]  mois de 1re mise en service (0 = inconnu)
+        bs  u16[m]  indice du jeu de bandes
+        cnt u8[n]   nombre de lignes par support
+        grp u8[m]   indice de l'exploitant (groupe)
+        sys u8[m]   indice du système
+    """
+    rows = con.execute(f"""
+        WITH ordre AS (
+            SELECT sup_id, row_number() OVER (ORDER BY insee, sup_id) - 1 AS pos FROM supports
+        ), b AS (
+            SELECT emr_id, list([f_deb, f_fin] ORDER BY f_deb, f_fin) AS bl
+            FROM bandes WHERE f_deb IS NOT NULL AND f_fin IS NOT NULL GROUP BY emr_id
+        ), t AS (
+            SELECT ss.sup_id, st.groupe, e.systeme, min(e.date_service) AS d,
+                   list_sort(list_distinct(flatten(list(coalesce(b.bl, []))))) AS bands
+            FROM emetteurs e
+            JOIN stations st USING (sta)
+            JOIN support_station ss USING (sta)
+            LEFT JOIN b USING (emr_id)
+            GROUP BY ALL
+        )
+        SELECT o.pos, t.groupe, t.systeme, {_month_sql('t.d')} AS mois, t.bands
+        FROM t JOIN ordre o USING (sup_id)
+        ORDER BY o.pos, t.groupe, t.systeme
+    """).fetchall()
+    n = con.execute("SELECT count(*) FROM supports").fetchall()[0][0]
+
+    groupes = sorted({r[1] for r in rows})
+    systemes = sorted({r[2] for r in rows})
+    gi = {g: i for i, g in enumerate(groupes)}
+    si = {x: i for i, x in enumerate(systemes)}
+    band_sets: dict[tuple, int] = {}
+    cnt = [0] * n
+    d, bs, grp, sy = array("H"), array("H"), array("B"), array("B")
+    for pos, g, x, mois, bands in rows:
+        key = tuple(tuple(b) for b in bands)
+        cnt[pos] += 1
+        d.append(mois)
+        bs.append(band_sets.setdefault(key, len(band_sets)))
+        grp.append(gi[g])
+        sy.append(si[x])
+    if max(cnt) > 255 or len(band_sets) > 65535 or len(groupes) > 255 or len(systemes) > 255:
+        raise ValueError("dépassement de capacité du format binaire des services")
+    if sys.byteorder == "big":
+        d.byteswap()
+        bs.byteswap()
+    payload = d.tobytes() + bs.tobytes() + array("B", cnt).tobytes() + grp.tobytes() + sy.tobytes()
+    path = out / "services.bin.gz"
+    path.write_bytes(gzip.compress(payload, compresslevel=9, mtime=0))
+    print(f"  {path.name} : {len(rows):,} lignes, {path.stat().st_size / 1e3:,.0f} Ko")
+
+    meta = {r[0]: r[1:] for r in con.execute(
+        "SELECT libelle, famille, generation, bande FROM ref_systemes").fetchall()}
+    cat = dict(con.execute("SELECT DISTINCT groupe, categorie FROM stations").fetchall())
+    write_json(out / "services.json", {
+        "version": 1,
+        "n": n,
+        "m": len(rows),
+        "colonnes": [["d", "u16"], ["bs", "u16"], ["cnt", "u8", "n"], ["grp", "u8"], ["sys", "u8"]],
+        "dictionnaires": {
+            "grp": [{"nom": g, "categorie": cat.get(g, "Autre")} for g in groupes],
+            "sys": [{"nom": x, "famille": meta.get(x, ("Autre", None, None))[0],
+                     "generation": meta.get(x, (None, None, None))[1],
+                     "bande": meta.get(x, (None, None, None))[2]} for x in systemes],
+            "bandes": [list(map(list, k)) for k in band_sets],
+        },
     })
 
 
