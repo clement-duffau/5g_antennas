@@ -62,6 +62,9 @@
       <li>Frise : la carte et les courbes cumulées utilisent la date de première mise en service, sur chaque support, d'un
         système de l'opérateur (parc actuel ; un site démonté n'y figure pas). Les courbes « archive par archive » comptent
         le parc déclaré dans chaque extraction mensuelle de l'ANFR depuis septembre 2018, démontages compris.</li>
+      <li>Spectre : pour chaque exploitant, les bandes déclarées sur les supports de la sélection, telles quelles
+        (une bande FDD apparaît comme deux blocs, voie montante et voie descendante). Une bande déclarée n'est pas
+        forcément émise en permanence, ni à pleine largeur.</li>
       <li>Exploitants regroupés par groupe (par exemple ORANGE et ORANGE service fixe) ; le libellé ANFR d'origine reste visible.</li>
     </ul>
 
