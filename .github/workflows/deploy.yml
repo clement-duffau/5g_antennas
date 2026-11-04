@@ -35,6 +35,11 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest -q tests
 
+      # Un déploiement précédent a pu enregistrer des agrégats après le commit déclencheur :
+      # on part de ceux de main pour ne pas recalculer les mêmes mois.
+      - name: Récupérer l'historique le plus récent
+        run: git fetch --depth=1 origin main && git checkout FETCH_HEAD -- data/history || true
+
       - name: Pipeline de données (+ mois d'archive manquants)
         run: python -m pipeline build --history --extraction "${{ github.event.inputs.extraction || 'latest' }}"
 
