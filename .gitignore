@@ -14,3 +14,8 @@ __pycache__/
 node_modules/
 dist/
 .DS_Store
+
+# Fichiers générés par le pipeline (publiés par la CI, jamais commités)
+site/public/data/
+*.duckdb
+*.duckdb.wal

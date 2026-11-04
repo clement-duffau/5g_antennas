@@ -1,2 +1,4 @@
-pandas>=2.2
+duckdb>=1.1
 requests>=2.31
+pandas>=2.2      # scripts d'exploration uniquement
+pytest>=8        # tests

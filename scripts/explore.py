@@ -8,7 +8,8 @@
   4. décrit chaque fichier (colonnes, volumes, valeurs nulles, valeurs fréquentes) ;
   5. sort des analyses ciblées (systèmes EMR_LB_SYSTEME, unités de fréquence,
      format des coordonnées, dates de mise en service) ;
-  6. écrit le tout dans docs/data-exploration.md.
+  6. écrit le tout dans docs/data-exploration-annexe.md (rapport brut ;
+     la synthèse commentée est dans docs/data-exploration.md).
 
 Usage :
     python scripts/explore.py                 # archive la plus récente
@@ -20,28 +21,57 @@ import argparse
 import io
 import re
 import sys
+import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW_DIR = ROOT / "data" / "raw"
-REPORT = ROOT / "docs" / "data-exploration.md"
+REPORT = ROOT / "docs" / "data-exploration-annexe.md"
 DATASET_SLUG = "donnees-sur-les-installations-radioelectriques-de-plus-de-5-watts-1"
 API = f"https://www.data.gouv.fr/api/1/datasets/{DATASET_SLUG}/"
 UA = {"User-Agent": "atlas-antennes-pipeline/0.1"}
+
+
+def session() -> requests.Session:
+    """Session HTTP avec tentatives et attente exponentielle (coupures réseau, 5xx)."""
+    s = requests.Session()
+    retry = Retry(total=6, connect=6, read=6, backoff_factor=2,
+                  status_forcelist=(429, 500, 502, 503, 504), allowed_methods=("GET", "HEAD"))
+    s.mount("https://", HTTPAdapter(max_retries=retry))
+    s.headers.update(UA)
+    return s
+
+
+HTTP = session()
 
 
 # --------------------------------------------------------------------------- #
 # Téléchargement
 # --------------------------------------------------------------------------- #
 def fetch_metadata() -> dict:
-    r = requests.get(API, headers=UA, timeout=60)
+    r = HTTP.get(API, timeout=60)
     r.raise_for_status()
     return r.json()
+
+
+def month_key(r: dict) -> str:
+    """Date d'extraction AAAAMMJJ en tête du nom de fichier (ex. 20260930-export-etalab-data.zip)."""
+    m = re.search(r"/(\d{8})-export-etalab", r.get("url", ""))
+    return m.group(1) if m else ""
+
+
+def latest_month(zres: list[dict]) -> tuple[str, list[dict]]:
+    """Ressources (data + ref) de l'extraction la plus récente."""
+    keyed = [r for r in zres if month_key(r)]
+    key = max(month_key(r) for r in keyed)
+    return key, [r for r in keyed if month_key(r) == key]
 
 
 def zip_resources(meta: dict) -> list[dict]:
@@ -60,13 +90,25 @@ def download(url: str, dest: Path) -> Path:
         print(f"déjà présent : {dest}")
         return dest
     print(f"téléchargement : {url}")
-    with requests.get(url, headers=UA, stream=True, timeout=300) as r:
-        r.raise_for_status()
-        tmp = dest.with_suffix(".part")
-        with open(tmp, "wb") as f:
-            for chunk in r.iter_content(1 << 20):
-                f.write(chunk)
-        tmp.rename(dest)
+    tmp = dest.with_suffix(".part")
+    for attempt in range(6):
+        done = tmp.stat().st_size if tmp.exists() else 0
+        headers = {"Range": f"bytes={done}-"} if done else {}
+        try:
+            with HTTP.get(url, headers=headers, stream=True, timeout=120) as r:
+                r.raise_for_status()
+                mode = "ab" if done and r.status_code == 206 else "wb"
+                with open(tmp, mode) as f:
+                    for chunk in r.iter_content(1 << 20):
+                        f.write(chunk)
+            tmp.rename(dest)
+            break
+        except (requests.ConnectionError, requests.Timeout) as e:
+            wait = 2 ** (attempt + 1)
+            print(f"  coupure ({e.__class__.__name__}), reprise dans {wait} s")
+            time.sleep(wait)
+    else:
+        raise RuntimeError(f"échec du téléchargement : {url}")
     return dest
 
 
@@ -229,47 +271,55 @@ def targeted(frames: dict[str, pd.DataFrame]) -> list[str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--zip", type=Path, help="archive déjà téléchargée")
+    ap.add_argument("--zip", type=Path, nargs="+", help="archive(s) déjà téléchargée(s)")
     args = ap.parse_args()
 
     meta_lines: list[str] = []
     if args.zip:
-        zpath = args.zip
+        zpaths = list(args.zip)
     else:
         meta = fetch_metadata()
         zres = zip_resources(meta)
         if not zres:
             print("aucune ressource zip trouvée", file=sys.stderr)
             return 1
-        latest = zres[0]
-        zpath = download(latest["url"], RAW_DIR / Path(latest["url"]).name.split("?")[0])
+        key, month = latest_month(zres)
+        zpaths = [download(r["url"], RAW_DIR / Path(r["url"]).name.split("?")[0]) for r in month]
+        months = sorted({month_key(r) for r in zres if month_key(r)})
         meta_lines = [
             f"- Jeu de données : **{meta.get('title')}** (`{meta.get('id')}`)",
             f"- Licence : `{meta.get('license')}` ; fréquence : `{meta.get('frequency')}` ; "
             f"dernière mise à jour : `{meta.get('last_update')}`",
-            f"- Ressources zip : {len(zres)} ; la plus récente : **{latest.get('title')}** "
-            f"({(latest.get('filesize') or 0) / 1e6:.1f} Mo, modifiée le {latest.get('last_modified')})",
-            "", "Dix ressources zip les plus récentes :", "",
-            "| Titre | Taille (Mo) | Modifiée |", "|---|---:|---|",
-        ] + [f"| {md_escape(r.get('title'))} | {(r.get('filesize') or 0) / 1e6:.1f} | {(r.get('last_modified') or '')[:10]} |"
-             for r in zres[:10]] + [""]
+            f"- {len(meta.get('resources', []))} ressources, dont {len(zres)} zip ; "
+            f"{len(months)} extractions datées, de `{months[0]}` à `{months[-1]}`",
+            f"- Extraction analysée : `{key}` :",
+            *[f"  - **{r.get('title')}** ({(r.get('filesize') or 0) / 1e6:.2f} Mo, publiée le "
+              f"{(r.get('last_modified') or '')[:10]}) — `{Path(r['url']).name}`" for r in month],
+            "", "Historique des archives *data* (taille en Mo) :", "",
+            "| Extraction | Titre | Taille (Mo) |", "|---|---|---:|",
+        ] + [f"| {month_key(r)} | {md_escape(r.get('title'))} | {(r.get('filesize') or 0) / 1e6:.1f} |"
+             for r in zres if "data" in Path(r.get("url", "")).name] + [""]
 
     frames: dict[str, pd.DataFrame] = {}
     infos: dict[str, dict] = {}
-    with zipfile.ZipFile(zpath) as zf:
-        members = [m for m in zf.namelist() if not m.endswith("/")]
-        for m in members:
-            if not re.search(r"\.(txt|csv)$", m, re.I):
-                continue
-            name = Path(m).stem
-            print(f"lecture {m}")
-            frames[name], infos[name] = read_member(zf, m)
+    members: list[str] = []
+    for zpath in zpaths:
+        with zipfile.ZipFile(zpath) as zf:
+            for m in zf.namelist():
+                if m.endswith("/"):
+                    continue
+                members.append(f"{zpath.name}:{m}")
+                if not re.search(r"\.(txt|csv)$", m, re.I):
+                    continue
+                name = Path(m).stem
+                print(f"lecture {m}")
+                frames[name], infos[name] = read_member(zf, m)
 
     rep: list[str] = [
-        "# Exploration des données ANFR",
+        "# Exploration des données ANFR — annexe générée",
         "",
         f"*Généré par `scripts/explore.py` le {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC "
-        f"à partir de `{zpath.name}`.*",
+        f"à partir de {', '.join(f'`{z.name}`' for z in zpaths)}.*",
         "",
         "## Source",
         "",
