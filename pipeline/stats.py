@@ -79,7 +79,7 @@ def build(con: duckdb.DuckDBPyConnection) -> dict:
                any_value(e.bande) AS bande, any_value(r.description) AS description,
                count(*) AS emetteurs, count(DISTINCT e.sup_id) AS supports,
                {", ".join(f"count(DISTINCT e.sup_id) FILTER (WHERE e.groupe = '{o}') AS \"{o}\"" for o in ops_list)},
-               min(e.date_service) AS premiere_mise_en_service
+               year(quantile_disc(e.date_service, 0.01)) AS debut_deploiement
         FROM emr_full e LEFT JOIN ref_systemes r ON r.libelle = e.systeme
         GROUP BY e.systeme ORDER BY emetteurs DESC
     """)
@@ -88,6 +88,11 @@ def build(con: duckdb.DuckDBPyConnection) -> dict:
     sites_operateur_systeme = _rows(con, """
         SELECT groupe, systeme, generation, bande, count(DISTINCT sup_id) AS sites, count(*) AS emetteurs
         FROM emr_full WHERE mobile GROUP BY ALL ORDER BY groupe, generation, systeme
+    """)
+
+    sites_operateur_generation = _rows(con, """
+        SELECT groupe, generation, count(DISTINCT sup_id) AS sites
+        FROM emr_full WHERE mobile GROUP BY ALL ORDER BY groupe, generation
     """)
 
     # Blocs de fréquences effectivement utilisés par chaque opérateur mobile (spectre national).
@@ -206,6 +211,7 @@ def build(con: duckdb.DuckDBPyConnection) -> dict:
         "familles": familles,
         "systemes": systemes,
         "sites_operateur_systeme": sites_operateur_systeme,
+        "sites_operateur_generation": sites_operateur_generation,
         "spectre_national": spectre,
         "departements": departements,
         "communes_top": communes_top,

@@ -1,0 +1,149 @@
+/* Jetons de design. Sombre par défaut ; clair via data-theme="light". */
+:root {
+  color-scheme: dark;
+  --page: #131c27;
+  --surface: #18232f;
+  --surface-2: #1f2c3a;
+  --line: #2a3848;
+  --line-strong: #3a4a5c;
+  --text: #e9eef3;
+  --text-2: #b3bfcb;
+  --muted: #8593a2;
+  --accent: #86b6ef;
+  --accent-ink: #0d1722;
+  --focus: #86b6ef;
+
+  /* Opérateurs mobiles : ordre fixe Orange, Bouygues, SFR, Free (validé daltonisme, paires adjacentes). */
+  --op-orange: #d95926;
+  --op-bouygues: #3987e5;
+  --op-sfr: #e66767;
+  --op-free: #9085e9;
+  --op-autre: #6b7886;
+
+  /* Générations : rampe ordinale bleue (plus clair = plus récent sur fond sombre). */
+  --gen-2g: #1c5cab;
+  --gen-3g: #2a78d6;
+  --gen-4g: #5598e7;
+  --gen-5g: #9ec5f4;
+
+  /* Rampe séquentielle (cartes de chaleur, densités). */
+  --seq-0: #1d2a38;
+  --seq-1: #184f95;
+  --seq-2: #256abf;
+  --seq-3: #3987e5;
+  --seq-4: #6da7ec;
+  --seq-5: #b7d3f6;
+
+  --radius: 6px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --maxw: 1240px;
+  --font: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --page: #f1f4f7;
+    --surface: #ffffff;
+    --surface-2: #e9eef3;
+    --line: #d9e0e7;
+    --line-strong: #bcc7d2;
+    --text: #0f1b27;
+    --text-2: #3f4d5b;
+    --muted: #66737f;
+    --accent: #1c5cab;
+    --accent-ink: #ffffff;
+    --focus: #1c5cab;
+    --op-orange: #eb6834;
+    --op-bouygues: #2a78d6;
+    --op-sfr: #e34948;
+    --op-free: #6250d6;
+    --op-autre: #8b97a3;
+    --gen-2g: #b7d3f6;
+    --gen-3g: #6da7ec;
+    --gen-4g: #2a78d6;
+    --gen-5g: #184f95;
+    --seq-0: #eef2f6;
+    --seq-1: #cde2fb;
+    --seq-2: #9ec5f4;
+    --seq-3: #5598e7;
+    --seq-4: #256abf;
+    --seq-5: #104281;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f1f4f7;
+  --surface: #ffffff;
+  --surface-2: #e9eef3;
+  --line: #d9e0e7;
+  --line-strong: #bcc7d2;
+  --text: #0f1b27;
+  --text-2: #3f4d5b;
+  --muted: #66737f;
+  --accent: #1c5cab;
+  --accent-ink: #ffffff;
+  --focus: #1c5cab;
+  --op-orange: #eb6834;
+  --op-bouygues: #2a78d6;
+  --op-sfr: #e34948;
+  --op-free: #6250d6;
+  --op-autre: #8b97a3;
+  --gen-2g: #b7d3f6;
+  --gen-3g: #6da7ec;
+  --gen-4g: #2a78d6;
+  --gen-5g: #184f95;
+  --seq-0: #eef2f6;
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #5598e7;
+  --seq-4: #256abf;
+  --seq-5: #104281;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+  font-variation-settings: 'wdth' 100;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-stretch: 118%;
+  font-weight: 640;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
+h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+h3 { font-size: 1.05rem; font-stretch: 108%; }
+
+p { margin: 0; max-width: 68ch; text-wrap: pretty; }
+
+a { color: var(--accent); text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
+
+button { font: inherit; color: inherit; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
