@@ -18,7 +18,7 @@ Les données sont régénérées chaque mois par une GitHub Action, puis le site
 |---|---|---|
 | 1 | Pipeline, statistiques, page Statistiques, déploiement | fait |
 | 2 | Carte des supports et fiche support | fait |
-| 3 | Filtres combinables | à faire |
+| 3 | Filtres combinables | fait |
 | 4 | Recherche « autour de moi » | à faire |
 | 5 | Frise du déploiement (avec les archives depuis 2018) | à faire |
 | 6 | Spectre d'une zone | à faire |
@@ -95,6 +95,7 @@ tests/                    tests pytest du nettoyage
 |---|---|---|
 | `stats.json` | statistiques nationales précalculées | 0,2 Mo / 30 Ko |
 | `supports.json` | index en colonnes des ~93 000 supports : position, hauteur, nature, propriétaire, commune, masques de bits opérateurs / générations / familles, dates | 5 Mo / 1,5 Mo |
+| `services.json` + `services.bin.gz` | une ligne par support × exploitant × système (880 000) : mois de 1re mise en service, jeu de bandes (dictionnaire de 4 170 jeux) ; colonnes binaires décompressées dans le navigateur (`DecompressionStream`) | 0,3 Mo + 1,5 Mo |
 | `detail/<dep>.json` | fiches complètes d'un département : stations, émetteurs (système, bandes, date), antennes (type, azimut, hauteur) ; chargées au clic | 0,3 à 5,5 Mo / 40 à 700 Ko |
 | `departements.geojson` | contours simplifiés | 0,2 Mo / 70 Ko |
 | `communes.json`, `departements.json` | référentiels (recherche, classements) | 2 Mo / 0,7 Mo |
@@ -117,7 +118,13 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
   (~34 Ko gzip de JavaScript hors carte). MapLibre (~280 Ko gzip) n'est chargé qu'à l'ouverture de la carte.
 - **Fond de carte OpenFreeMap** (tuiles vectorielles OpenStreetMap, sans clé d'API), styles *dark* et *positron*
   selon le thème. S'il est inaccessible, la carte se rabat sur les contours des départements.
-- **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`.
+- **Filtres exacts côté client.** Un support est retenu si au moins une de ses lignes de service satisfait
+  *tous* les critères de service à la fois (exploitant, génération, famille, système, bande, date) : « Free + 5G »
+  n'attrape pas un pylône où Free n'a que de la 4G et Orange de la 5G. Les critères du support (territoire,
+  nature, hauteur) sont testés sur l'index. Au sein d'un critère, les valeurs se combinent par OU ; entre
+  critères, par ET. Le calcul parcourt 880 000 lignes en quelques dizaines de millisecondes.
+- **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`, et les filtres :
+  `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`.
 
 ## Déploiement
 

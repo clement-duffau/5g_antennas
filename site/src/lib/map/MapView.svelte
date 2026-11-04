@@ -318,6 +318,24 @@
     if (pt.x > 20 && pt.x < visibleW - 20 && pt.y > 20 && pt.y < visibleH - 20) return
     map.easeTo({ center: [index.lon[i], index.lat[i]], offset: [(visibleW - w) / 2, (visibleH - h) / 2], duration: 500 })
   }
+  /** Cadre la carte sur les supports retenus (filtre de territoire). */
+  export function fitMask(mask: Uint8Array) {
+    if (!map) return
+    let w = 180, e = -180, so = 90, no = -90, n = 0
+    for (let i = 0; i < index.n; i++) {
+      if (!mask[i]) continue
+      n++
+      const x = index.lon[i], y = index.lat[i]
+      if (x < w) w = x
+      if (x > e) e = x
+      if (y < so) so = y
+      if (y > no) no = y
+    }
+    if (!n) return
+    const { clientWidth } = map.getContainer()
+    const left = clientWidth > 720 ? 340 : 20
+    map.fitBounds([[w, so], [e, no]], { padding: { top: 40, bottom: 40, left, right: 40 }, maxZoom: 14, duration: 700 })
+  }
   export function flyTo(lon: number, lat: number, zoom: number) {
     map?.flyTo({ center: [lon, lat], zoom, essential: true })
   }
