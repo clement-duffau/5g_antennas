@@ -29,7 +29,8 @@ Les contrôles complémentaires viennent de `scripts/explore_checks.py`.
 
 - **Encodage : tous les fichiers de cette extraction sont en UTF-8** (décodage strict réussi), y compris
   SUP_SUPPORT (`Château`, `Pylône`, `n°9` sont corrects). L'hypothèse Windows-1252 ne se vérifie pas
-  pour ce mois. Elle a pu être vraie sur d'anciennes extractions : le pipeline garde donc une détection
+  pour ce mois. **Elle est en revanche vraie pour les archives antérieures** : de septembre 2018 à septembre 2025
+  au moins, SUP_SUPPORT est en Windows-1252 (vérifié lors du calcul de l'historique), les autres fichiers en UTF-8. Elle a pu être vraie sur d'anciennes extractions : le pipeline garde donc une détection
   fichier par fichier (UTF-8 strict, sinon cp1252), ce qui comptera pour l'historique depuis 2018.
 - Séparateur `;`, fins de ligne CRLF, en-tête présent, **virgule décimale** (`2,7`, `906,2`).
 - Dates au format `JJ/MM/AAAA`.
@@ -165,7 +166,17 @@ Pour FH, PMR ou SAT, il faut les fréquences de `SUP_BANDE`.
 - Les noms des exploitants PMR, anonymisés en « RESEAU PRIVE » ou « Site privé ».
 - Les petites installations de moins de 5 W (small cells, Wi-Fi…).
 
-## 13. Conséquences pour l'architecture
+## 13. Archives antérieures (historique)
+
+- Les archives depuis septembre 2018 ont les mêmes tables et les mêmes colonnes utiles, à deux différences près :
+  `SUP_EMETTEUR` n'a pas encore `EMR_DT_SERVICE` en 2018, et SUP_SUPPORT est en Windows-1252.
+- Quelques libellés de systèmes n'existent plus : `GSM 900/GSM 1800`, `UMTS 2100/UMTS 900` (déclarations bi-bandes),
+  `5G NR 3400-3800 Expe`, `LTE 1400 Expe`. Ils sont ajoutés à `pipeline/refs/systemes.csv`.
+- Ce que montrent les archives, entre septembre 2018 et septembre 2026 (métropole) :
+  GSM 1800 de 53 080 à 1 605 émetteurs (refarming au profit du LTE 1800), UMTS 2100 de 181 942 à 15 762,
+  et la 3G de Free de 17 076 sites à 32 729 en 2025 puis 6 811 en 2026 (extinction en cours).
+
+## 14. Conséquences pour l'architecture
 
 - **98 980 supports seulement** : l'ensemble des points tient dans le navigateur. Un index compact par support
   (coordonnées, exploitants, familles de systèmes, bandes, dates) se filtre côté client en quelques ms.
