@@ -75,7 +75,12 @@
 
   const xsYears = (m0: number, m1: number) => Array.from({ length: m1 - m0 + 1 }, (_, i) => m0 + i)
   // Graduation à la première abscisse de chaque année (archives : un point par extraction).
-  const firstOfYear = (xs: number[]) => (x: number, i: number) => (i === 0 || yearOf(x) !== yearOf(xs[i - 1]) ? String(yearOf(x)) : null)
+  // La première abscisse n'est graduée que si l'année suivante n'arrive pas juste après (évite « 20182019 »).
+  const firstOfYear = (xs: number[]) => (x: number, i: number) => {
+    if (i > 0) return yearOf(x) !== yearOf(xs[i - 1]) ? String(yearOf(x)) : null
+    const next = xs.findIndex((v) => yearOf(v) !== yearOf(x))
+    return next < 0 || next >= Math.max(3, xs.length / 12) ? String(yearOf(x)) : null
+  }
   const yearTick = (step: number) => (x: number) => ((x - 1) % 12 === 0 && yearOf(x) % step === 0 ? String(yearOf(x)) : null)
 </script>
 
@@ -153,6 +158,7 @@
           <p class="note">
             {h.mois.length} extractions mensuelles de l'ANFR, de {monthName(xs[0])} à {monthName(xs[xs.length - 1])}.
             Contrairement aux dates de mise en service, ces séries montrent aussi les sites démontés : extinction de la 2G et de la 3G, refarming des bandes.
+            Quelques mois n'ont pas été publiés par l'ANFR : les courbes relient alors les extractions voisines.
           </p>
           <div class="grid2">
             <div>

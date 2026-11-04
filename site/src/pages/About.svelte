@@ -4,6 +4,16 @@
   import { fmt, fmtDate } from '../lib/format'
 
   const statsPromise = loadJSON<Stats>('stats.json')
+  const base = import.meta.env.BASE_URL
+  const FILES: [string, string][] = [
+    ['stats.json', 'Statistiques nationales de la page Statistiques'],
+    ['supports.json', 'Index de tous les supports (position, hauteur, nature, propriétaire, commune, opérateurs, technologies, dates) ; colonnes encodées en différences'],
+    ['services.json', 'Dictionnaires de la table des services (exploitants, systèmes, jeux de bandes)'],
+    ['services.bin.gz', 'Table binaire : une ligne par support × exploitant × système, avec mois de mise en service et jeu de bandes'],
+    ['history.json', 'Séries mensuelles des archives ANFR depuis 2018'],
+    ['communes.json', 'Communes : population, superficie, centre, nombre de supports'],
+    ['departements.geojson', 'Contours simplifiés des départements'],
+  ]
 </script>
 
 <article class="about">
@@ -68,11 +78,36 @@
       <li>Exploitants regroupés par groupe (par exemple ORANGE et ORANGE service fixe) ; le libellé ANFR d'origine reste visible.</li>
     </ul>
 
-    <h2>Code et données</h2>
+    <h2>Mise à jour</h2>
     <p>
-      Le code du pipeline (Python, DuckDB) et du site (Svelte) est public sur
-      <a href="https://github.com/clement-duffau/5g_antennas">GitHub</a>. Les fichiers sont régénérés chaque mois par une GitHub Action
-      après la publication de l'ANFR.
+      Les données sont régénérées automatiquement les 9 et 16 de chaque mois, après la publication de l'ANFR
+      (en général entre le 3 et le 12). L'historique de la frise remonte à septembre 2018 ; chaque nouvelle extraction
+      y est ajoutée.
+    </p>
+
+    <h2>Télécharger les données du site</h2>
+    <p>Fichiers dérivés, sous la même Licence Ouverte, pour l'extraction du {fmtDate(s.meta.extraction)} :</p>
+    <dl class="files">
+      {#each FILES as [file, desc] (file)}
+        <dt><a href="{base}data/{file}" download>{file}</a></dt><dd>{desc}</dd>
+      {/each}
+    </dl>
+    <p class="small">
+      Les formats sont décrits dans le <a href="https://github.com/clement-duffau/5g_antennas#readme">README</a> du dépôt.
+      Pour un usage sérieux, repartez de la source ANFR : ces fichiers sont simplifiés pour l'affichage.
+    </p>
+
+    <h2>Citer</h2>
+    <p class="cite">
+      Atlas des antennes radio en France, d'après ANFR, « Données sur les installations radioélectriques de plus de 5 watts »,
+      extraction du {fmtDate(s.meta.extraction)}, Licence Ouverte 2.0. https://clement-duffau.github.io/5g_antennas/
+    </p>
+
+    <h2>Code et crédits</h2>
+    <p>
+      Le code du pipeline (Python, DuckDB) et du site (Svelte 5, MapLibre GL) est public sur
+      <a href="https://github.com/clement-duffau/5g_antennas">GitHub</a>. Données : ANFR, geo.api.gouv.fr, IGN (contours et géocodage).
+      Fond de carte : OpenFreeMap, OpenMapTiles, contributeurs OpenStreetMap. Police : Archivo (Omnibus-Type, SIL Open Font License).
     </p>
   {/await}
 </article>
@@ -82,6 +117,9 @@
   h1 { margin-bottom: 8px; }
   h2 { margin-top: 28px; font-size: 1.3rem; }
   .lede { font-size: 1.08rem; color: var(--text-2); }
+  .files dt a { font-family: inherit; font-weight: 600; }
+  .small { font-size: 0.88rem; }
+  .cite { padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0; font-size: 0.92rem; }
   ul { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--text-2); }
   li strong, p strong { color: var(--text); font-weight: 600; }
   p { color: var(--text-2); }

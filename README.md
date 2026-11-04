@@ -22,7 +22,7 @@ Les données sont régénérées chaque mois par une GitHub Action, puis le site
 | 4 | Recherche « autour de moi » | fait |
 | 5 | Frise du déploiement (avec les archives depuis 2018) | fait |
 | 6 | Spectre d'une zone | fait |
-| 7 | Finitions, page À propos complète | en partie (page À propos déjà en ligne) |
+| 7 | Finitions, page À propos complète | fait |
 
 ## Démarrage rapide
 
@@ -142,6 +142,9 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
   exploitant, une barre par bande déclarée, couleur par famille de systèmes, opacité selon la part des supports
   concernés. Vues : tout le spectre (échelle logarithmique, bandes UIT), 30 MHz–1 GHz, bandes mobiles, faisceaux
   hertziens ; tableau des bandes. Accessible par l'onglet *Spectre* du panneau de zone et le bouton *Spectre* de la carte.
+- **Accessibilité.** Audit axe-core sans violation sur toutes les pages, dans les deux thèmes, y compris carte avec
+  panneaux ouverts : contrastes calculés (jetons `--on-seq-*` pour le texte posé sur la rampe séquentielle),
+  navigation au clavier, lien d'évitement, tableaux de données en alternative aux graphiques, mouvement réduit respecté.
 - **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`, et les filtres :
   `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`,
   et la zone : `zone=<lat>,<lon>,<rayon en m>&zl=<libellé>`.

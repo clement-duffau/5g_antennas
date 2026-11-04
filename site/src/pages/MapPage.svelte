@@ -124,8 +124,8 @@
   })
 
   // Recadrage quand le territoire change (une fois le masque correspondant calculé).
-  // Au chargement, on garde la vue de l'URL : seul un changement ultérieur recadre.
-  let lastTerritory = untrack(() => territoryKey(filters))
+  // Au chargement, on garde la vue de l'URL si elle en donne une ; sinon on cadre sur le territoire filtré.
+  let lastTerritory = untrack(() => (p.c ? territoryKey(filters) : '#'))
   $effect(() => {
     const r = result
     if (!r || r.territory === lastTerritory) return
