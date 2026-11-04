@@ -190,3 +190,20 @@ def test_export_services_binaire(con, tmp_path):
     assert lignes[("Orange", "LTE 800")] == ((2014 - 1980) * 12 + 3, [[791.0, 801.0], [832.0, 842.0]])
     assert lignes[("SFR", "5G NR 3500")][0] == 0           # date future -> inconnue
     assert D["sys"][sy[0]]["famille"] in {"Mobile"}
+
+
+def test_historique_agregat_et_series(con, tmp_path):
+    from pipeline import history
+
+    agg = history.aggregate(con)
+    # Métropole seulement : supports 1 et 2 ; émetteurs 100 à 103 (104 est à La Réunion).
+    assert agg["supports"] == 2 and agg["emetteurs"] == 4
+    assert agg["sites"]["Orange"]["4G"] == 1 and agg["sites"]["Orange"]["total"] == 1
+    assert agg["sites"]["SFR"]["5G"] == 1 and agg["sites"]["Free"]["total"] == 0
+    assert agg["systemes"]["LTE 800"] == {"total": 1, "Orange": 1}
+    history.save("20250930", {**agg, "supports": 1}, tmp_path)
+    history.save("20260930", agg, tmp_path)
+    s = history.assemble(tmp_path)
+    assert s["mois"] == ["2025-09", "2026-09"] and s["supports"] == [1, 2]
+    assert s["sites"]["SFR"]["5G"] == [1, 1]
+    assert s["systemes"]["5G NR 3500"]["SFR"] == [1, 1]
