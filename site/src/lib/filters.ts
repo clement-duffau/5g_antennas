@@ -10,6 +10,10 @@
  */
 import type { SupportIndex } from './supports'
 import type { Services } from './services'
+import { distance } from './geo'
+
+/** Zone « autour de moi » : centre, rayon en mètres et libellé affiché. */
+export interface Zone { lat: number; lon: number; r: number; label: string }
 
 export interface Filters {
   ops: string[]      // exploitants (groupes)
@@ -22,15 +26,16 @@ export interface Filters {
   com: string | null // code INSEE
   nat: string[]
   h: [number, number] | null   // hauteur (m)
+  zone: Zone | null
 }
 
-export const EMPTY: Filters = { ops: [], gens: [], fams: [], sys: [], f: null, y: null, deps: [], com: null, nat: [], h: null }
+export const EMPTY: Filters = { ops: [], gens: [], fams: [], sys: [], f: null, y: null, deps: [], com: null, nat: [], h: null, zone: null }
 
 export const needsServices = (f: Filters) =>
   f.ops.length > 0 || f.gens.length > 0 || f.fams.length > 0 || f.sys.length > 0 || f.f !== null || f.y !== null
 
 export const isEmpty = (f: Filters) =>
-  !needsServices(f) && !f.deps.length && !f.com && !f.nat.length && !f.h
+  !needsServices(f) && !f.deps.length && !f.com && !f.nat.length && !f.h && !f.zone
 
 // ------------------------------------------------------------------ URL
 const list = (s?: string) => (s ? s.split('|').filter(Boolean) : [])
@@ -40,8 +45,15 @@ const pair = (s?: string): [number, number] | null => {
   return Number.isFinite(a) && Number.isFinite(b) ? [a, b] : null
 }
 
+function zoneFrom(p: Record<string, string>): Zone | null {
+  const [lat, lon, r] = (p.zone ?? '').split(',').map(Number)
+  if (![lat, lon, r].every(Number.isFinite) || r <= 0) return null
+  return { lat, lon, r, label: p.zl || `${lat.toFixed(4)}, ${lon.toFixed(4)}` }
+}
+
 export function fromParams(p: Record<string, string>): Filters {
   return {
+    zone: zoneFrom(p),
     ops: list(p.op), gens: list(p.gen), fams: list(p.fam), sys: list(p.sys),
     f: pair(p.f), y: pair(p.y), deps: list(p.dep), com: p.com || null, nat: list(p.nat), h: pair(p.h),
   }
@@ -53,6 +65,8 @@ export function toParams(f: Filters): Record<string, string | null> {
   return {
     op: j(f.ops), gen: j(f.gens), fam: j(f.fams), sys: j(f.sys), f: r(f.f), y: r(f.y),
     dep: j(f.deps), com: f.com, nat: j(f.nat), h: r(f.h),
+    zone: f.zone ? `${f.zone.lat.toFixed(5)},${f.zone.lon.toFixed(5)},${f.zone.r}` : null,
+    zl: f.zone ? f.zone.label : null,
   }
 }
 
@@ -99,8 +113,18 @@ export function apply(idx: SupportIndex, sv: Services | null, f: Filters): Resul
     }
   }
 
+  // Zone : préfiltre rapide par boîte englobante, puis distance exacte.
+  const z = f.zone
+  const dLat = z ? z.r / 111320 : 0
+  const dLon = z ? z.r / (111320 * Math.cos((z.lat * Math.PI) / 180)) : 0
+
   let count = 0
   for (let i = 0; i < n; i++) {
+    if (z) {
+      const la = idx.lat[i], lo = idx.lon[i]
+      if (Math.abs(la - z.lat) > dLat || Math.abs(lo - z.lon) > dLon) continue
+      if (distance(z.lat, z.lon, la, lo) > z.r) continue
+    }
     if (useCom && !comOk[idx.com[i]]) continue
     if (natOk && !natOk[idx.nat[i]]) continue
     if (f.h) {

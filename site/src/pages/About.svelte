@@ -22,6 +22,8 @@
       « Données sur les installations radioélectriques de plus de 5 watts »</a> de l'Agence nationale des fréquences (ANFR),
       publié chaque mois sur data.gouv.fr sous <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/">Licence Ouverte 2.0</a>.
       Les populations et superficies communales viennent de <a href="https://geo.api.gouv.fr/">geo.api.gouv.fr</a>.
+      La recherche d'adresse utilise le géocodeur de l'<a href="https://geoservices.ign.fr/">IGN (Géoplateforme)</a>,
+      interrogé directement depuis votre navigateur ; aucune adresse n'est enregistrée par ce site.
       Le fond de carte est fourni par <a href="https://openfreemap.org/">OpenFreeMap</a>
       (© OpenMapTiles, données © <a href="https://www.openstreetmap.org/copyright">contributeurs OpenStreetMap</a>).
     </p>

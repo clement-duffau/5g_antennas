@@ -6,7 +6,8 @@ interface RawIndex {
   n: number
   deltas: string[]
   echelles: { lat: number; lon: number; h: number; mois_origine: string }
-  dictionnaires: { nat: string[]; tpo: string[]; com: [string, string][]; ops: string[]; gen: string[]; fam: string[] }
+  /** com : [code INSEE, nom, latitude du centre, longitude du centre] */
+  dictionnaires: { nat: string[]; tpo: string[]; com: [string, string, number | null, number | null][]; ops: string[]; gen: string[]; fam: string[] }
   colonnes: Record<string, (number | null)[]>
 }
 

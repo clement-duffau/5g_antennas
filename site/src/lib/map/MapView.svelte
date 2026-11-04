@@ -10,9 +10,12 @@
   import { communeOf, type SupportIndex } from '../supports'
   import { resolveColor, type ColorMode } from '../categories'
   import { fmt, fmt1 } from '../format'
+  import { circle } from '../geo'
+  import type { FeatureCollection } from 'geojson'
+  import type { Zone } from '../filters'
 
   let {
-    index, cats, colorMode, display, hidden, visible, selected, theme, view, onselect, onview,
+    index, cats, colorMode, display, hidden, visible, selected, theme, view, onselect, onview, zone = null,
   }: {
     index: SupportIndex
     cats: Record<string, Uint8Array>
@@ -27,6 +30,8 @@
     view: View
     onselect: (i: number | null) => void
     onview: (v: View) => void
+    /** zone « autour de moi » dessinée sur la carte */
+    zone?: Zone | null
   } = $props()
 
   const BASEMAPS = {
@@ -78,6 +83,15 @@
       cluster: true, clusterRadius: 46, clusterMaxZoom: 12,
     })
 
+    map.addSource('zone', { type: 'geojson', data: zoneData() })
+    map.addLayer({
+      id: 'zone-fill', type: 'fill', source: 'zone', filter: ['==', ['geometry-type'], 'Polygon'],
+      paint: { 'fill-color': resolveColor('var(--accent)'), 'fill-opacity': 0.07 },
+    })
+    map.addLayer({
+      id: 'zone-line', type: 'line', source: 'zone', filter: ['==', ['geometry-type'], 'Polygon'],
+      paint: { 'line-color': resolveColor('var(--accent)'), 'line-width': 1.5, 'line-dasharray': [3, 2] },
+    })
     map.addLayer({
       id: 'sup-heat', type: 'heatmap', source: 'sup', maxzoom: 13,
       filter: hiddenFilter(),
@@ -125,6 +139,13 @@
       paint: { 'circle-color': colorExpr(), 'circle-radius': radius, 'circle-stroke-color': surface, 'circle-stroke-width': 1 },
     })
     map.addLayer({
+      id: 'zone-center', type: 'circle', source: 'zone', filter: ['==', ['geometry-type'], 'Point'],
+      paint: {
+        'circle-radius': 6, 'circle-color': resolveColor('var(--accent)'),
+        'circle-stroke-color': resolveColor('var(--surface)'), 'circle-stroke-width': 2.5,
+      },
+    })
+    map.addLayer({
       id: 'sup-selected', type: 'circle', source: 'sup', filter: ['==', ['get', 'i'], selected ?? -1],
       paint: {
         'circle-color': 'rgba(0,0,0,0)',
@@ -139,6 +160,29 @@
     if (selected != null && !revealedOnce) { revealedOnce = true; reveal(selected) }
   }
   let revealedOnce = false
+
+  function zoneData(): FeatureCollection {
+    if (!zone) return { type: 'FeatureCollection', features: [] }
+    return {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [circle(zone.lat, zone.lon, zone.r)] } },
+        { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [zone.lon, zone.lat] } },
+      ],
+    }
+  }
+
+  /** Cadre la carte sur la zone (en laissant la place des panneaux). */
+  export function fitZone() {
+    if (!map || !zone) return
+    const dLat = zone.r / 111320, dLon = zone.r / (111320 * Math.cos((zone.lat * Math.PI) / 180))
+    const { clientWidth: w, clientHeight: h } = map.getContainer()
+    const mobile = w <= 720
+    map.fitBounds([[zone.lon - dLon, zone.lat - dLat], [zone.lon + dLon, zone.lat + dLat]], {
+      padding: mobile ? { top: 120, bottom: h * 0.62 + 10, left: 16, right: 16 } : { top: 40, bottom: 40, left: 360, right: 480 },
+      duration: 700,
+    })
+  }
 
   function applyDisplay() {
     if (!map?.getLayer('sup-points')) return
@@ -289,6 +333,14 @@
     ;(map.getSource('sup-cl') as GeoJSONSource).setData(
       display === 'groupes' ? features(false) : { type: 'FeatureCollection', features: [] })
     applyDisplay()
+  })
+  let lastZone = ''
+  $effect(() => {
+    const key = zone ? `${zone.lat},${zone.lon},${zone.r}` : ''
+    if (!ready || !map) return
+    ;(map.getSource('zone') as GeoJSONSource | undefined)?.setData(zoneData())
+    if (key && key !== lastZone) fitZone()
+    lastZone = key
   })
   $effect(() => {
     const sel = selected ?? -1
