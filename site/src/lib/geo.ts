@@ -36,3 +36,29 @@ export function circle(lat: number, lon: number, r: number, steps = 96): [number
   }
   return pts
 }
+
+/** Écart angulaire signé le plus court de a vers b, en degrés, dans ]-180, 180]. */
+export function angleDiff(a: number, b: number): number {
+  const d = (((b - a) % 360) + 540) % 360 - 180
+  return d === -180 ? 180 : d
+}
+
+/** Point atteint depuis (lat, lon) en suivant le cap `brg` (degrés) sur `dist` mètres (sphère). */
+export function destination(lat: number, lon: number, brg: number, dist: number): [number, number] {
+  const d = dist / R, t = rad(brg), p1 = rad(lat), l1 = rad(lon)
+  const p2 = Math.asin(Math.sin(p1) * Math.cos(d) + Math.cos(p1) * Math.sin(d) * Math.cos(t))
+  const l2 = l1 + Math.atan2(Math.sin(t) * Math.sin(d) * Math.cos(p1), Math.cos(d) - Math.sin(p1) * Math.sin(p2))
+  return [(((l2 * 180) / Math.PI + 540) % 360) - 180, (p2 * 180) / Math.PI]
+}
+
+/**
+ * Secteur circulaire (anneau GeoJSON fermé, [lon, lat]) : le centre, puis un arc de `steps` + 1 points
+ * de az − ouverture/2 à az + ouverture/2, à `dist` mètres, puis retour au centre.
+ */
+export function sector(lat: number, lon: number, az: number, aperture: number, dist: number, steps = 24): [number, number][] {
+  const ring: [number, number][] = [[lon, lat]]
+  const a0 = az - aperture / 2
+  for (let k = 0; k <= steps; k++) ring.push(destination(lat, lon, a0 + (aperture * k) / steps, dist))
+  ring.push([lon, lat])
+  return ring
+}
