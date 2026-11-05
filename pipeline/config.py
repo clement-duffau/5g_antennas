@@ -15,7 +15,7 @@ DATASET_SLUG = "donnees-sur-les-installations-radioelectriques-de-plus-de-5-watt
 DATASET_API = f"https://www.data.gouv.fr/api/1/datasets/{DATASET_SLUG}/"
 DATASET_PAGE = f"https://www.data.gouv.fr/fr/datasets/{DATASET_SLUG}/"
 GEO_API = "https://geo.api.gouv.fr"
-USER_AGENT = "atlas-antennes-pipeline/0.1 (+https://github.com/clement-duffau/5g_antennas)"
+USER_AGENT = "atlas-antennes-pipeline/0.1 (+https://github.com/clement-duffau/atlas-antennes)"
 
 # Périmètre : France métropolitaine (Corse comprise). Les codes INSEE 97x/98x sont exclus.
 EXCLUDED_INSEE_PREFIXES = ("97", "98")

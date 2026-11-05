@@ -93,20 +93,20 @@
       {/each}
     </dl>
     <p class="small">
-      Les formats sont décrits dans le <a href="https://github.com/clement-duffau/5g_antennas#readme">README</a> du dépôt.
+      Les formats sont décrits dans le <a href="https://github.com/clement-duffau/atlas-antennes#readme">README</a> du dépôt.
       Pour un usage sérieux, repartez de la source ANFR : ces fichiers sont simplifiés pour l'affichage.
     </p>
 
     <h2>Citer</h2>
     <p class="cite">
       Atlas des antennes radio en France, d'après ANFR, « Données sur les installations radioélectriques de plus de 5 watts »,
-      extraction du {fmtDate(s.meta.extraction)}, Licence Ouverte 2.0. https://clement-duffau.github.io/5g_antennas/
+      extraction du {fmtDate(s.meta.extraction)}, Licence Ouverte 2.0. https://clement-duffau.github.io/atlas-antennes/
     </p>
 
     <h2>Code et crédits</h2>
     <p>
       Le code du pipeline (Python, DuckDB) et du site (Svelte 5, MapLibre GL) est public sur
-      <a href="https://github.com/clement-duffau/5g_antennas">GitHub</a>. Données : ANFR, geo.api.gouv.fr, IGN (contours et géocodage).
+      <a href="https://github.com/clement-duffau/atlas-antennes">GitHub</a>. Données : ANFR, geo.api.gouv.fr, IGN (contours et géocodage).
       Fond de carte : OpenFreeMap, OpenMapTiles, contributeurs OpenStreetMap. Police : Archivo (Omnibus-Type, SIL Open Font License).
     </p>
   {/await}

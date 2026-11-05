@@ -4,7 +4,8 @@ Site statique pour explorer les **installations radioélectriques de plus de 5 W
 France métropolitaine : supports (pylônes, toits, châteaux d'eau…), exploitants, technologies
 (GSM, UMTS, LTE, 5G NR, FM, TNT, PMR, faisceaux hertziens…), bandes de fréquences et dates de mise en service.
 
-Les données sont régénérées chaque mois par une GitHub Action, puis le site est publié sur GitHub Pages.
+Les données sont régénérées chaque mois par une GitHub Action, puis le site est publié sur GitHub Pages :
+**https://clement-duffau.github.io/atlas-antennes/**
 
 ![Aperçu de la carte](docs/apercu-carte.png)
 
