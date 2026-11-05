@@ -10,13 +10,16 @@
   import { communeOf, type SupportIndex } from '../supports'
   import { resolveColor, type ColorMode } from '../categories'
   import { fmt, fmt1 } from '../format'
-  import { circle } from '../geo'
+  import { circle, fmtDistance } from '../geo'
   import { BASEMAPS, BOUNDS, fallbackStyle } from './basemap'
   import type { FeatureCollection } from 'geojson'
   import type { Zone } from '../filters'
 
+  const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
+
   let {
     index, cats, colorMode, display, hidden, visible, selected, theme, view, onselect, onview, zone = null,
+    azimuth = { cones: EMPTY_FC, fh: EMPTY_FC },
   }: {
     index: SupportIndex
     cats: Record<string, Uint8Array>
@@ -33,6 +36,8 @@
     onview: (v: View) => void
     /** zone « autour de moi » dessinée sur la carte */
     zone?: Zone | null
+    /** azimuts : cônes (secteurs) et traits de faisceaux hertziens */
+    azimuth?: { cones: FeatureCollection; fh: FeatureCollection }
   } = $props()
 
 
@@ -88,6 +93,30 @@
       id: 'zone-line', type: 'line', source: 'zone', filter: ['==', ['geometry-type'], 'Polygon'],
       paint: { 'line-color': resolveColor('var(--accent)'), 'line-width': 1.5, 'line-dasharray': [3, 2] },
     })
+    // Azimuts : sous les supports, sans gestionnaire de clic (ne gênent pas la sélection des supports).
+    const opColorExpr = ['match', ['get', 'op'],
+      0, resolveColor('var(--op-orange)'), 1, resolveColor('var(--op-bouygues)'),
+      2, resolveColor('var(--op-sfr)'), 3, resolveColor('var(--op-free)'), resolveColor('var(--cat-7)'),
+    ] as unknown as maplibregl.ExpressionSpecification
+    map.addSource('az-cones', { type: 'geojson', data: azimuth.cones })
+    map.addSource('az-fh', { type: 'geojson', data: azimuth.fh })
+    map.addLayer({ id: 'az-cone-fill', type: 'fill', source: 'az-cones', paint: { 'fill-color': opColorExpr, 'fill-opacity': 0.2 } })
+    map.addLayer({
+      id: 'az-cone-line', type: 'line', source: 'az-cones',
+      paint: { 'line-color': opColorExpr, 'line-width': 0.8, 'line-opacity': 0.85 },
+    })
+    map.addLayer({
+      id: 'az-fh-line', type: 'line', source: 'az-fh', filter: ['==', ['get', 'kind'], 'fixe'],
+      paint: { 'line-color': opColorExpr, 'line-width': 1.6, 'line-opacity': 0.9 },
+    })
+    map.addLayer({
+      id: 'az-fh-link', type: 'line', source: 'az-fh', filter: ['==', ['get', 'kind'], 'lien'],
+      layout: { 'line-cap': 'round' },
+      paint: { 'line-color': opColorExpr, 'line-width': 1.6, 'line-opacity': 0.95, 'line-dasharray': [2, 2] },
+    })
+    // Zone de survol invisible et plus large que le trait, pour l'infobulle des faisceaux.
+    map.addLayer({ id: 'az-fh-hit', type: 'line', source: 'az-fh', paint: { 'line-color': '#000', 'line-width': 12, 'line-opacity': 0 } })
+
     map.addLayer({
       id: 'sup-heat', type: 'heatmap', source: 'sup', maxzoom: 13,
       filter: hiddenFilter(),
@@ -233,6 +262,28 @@
     popup?.remove()
   }
 
+  interface FhProps { id: number; grp: string; az: number; kind: 'lien' | 'fixe'; level: string | null; cible: number | null; dist: number | null }
+  let fhPopup: maplibregl.Popup | undefined
+  function showFh(p: FhProps, at: maplibregl.LngLat) {
+    if (!map) return
+    const el = document.createElement('div')
+    const t = document.createElement('strong')
+    t.textContent = `${p.grp} · faisceau hertzien, ${p.az}°`
+    const sub = document.createElement('div')
+    sub.textContent = p.kind === 'lien'
+      ? `Liaison ${p.level === 'retour' ? 'probable' : 'possible'} vers le support n° ${p.cible} (${fmtDistance(p.dist ?? 0)})`
+      : 'Aucun support identifié dans l\'axe : trait de longueur fixe'
+    el.append(t, sub)
+    if (p.kind === 'lien' && p.level !== 'retour') {
+      const n = document.createElement('div')
+      n.className = 'pop-ops'
+      n.textContent = 'Pas d\'azimut retour déclaré sur ce support.'
+      el.append(n)
+    }
+    fhPopup ??= new maplibregl.Popup({ closeButton: false, closeOnClick: true, offset: 8, className: 'sup-pop' })
+    fhPopup.setLngLat(at).setDOMContent(el).addTo(map)
+  }
+
   onMount(() => {
     map = new maplibregl.Map({
       container,
@@ -280,9 +331,20 @@
     })
     map.on('mouseenter', 'cl-circles', () => { if (map) map.getCanvas().style.cursor = 'pointer' })
     map.on('mouseleave', 'cl-circles', () => { if (map) map.getCanvas().style.cursor = '' })
+    map.on('mousemove', 'az-fh-hit', (e) => {
+      if (!map || !e.features?.length) return
+      if (map.queryRenderedFeatures(e.point, { layers: ['sup-points', 'cl-points'].filter((l) => map!.getLayer(l)) }).length) return
+      map.getCanvas().style.cursor = 'help'
+      showFh(e.features[0].properties as FhProps, e.lngLat)
+    })
+    map.on('mouseleave', 'az-fh-hit', () => { if (map) map.getCanvas().style.cursor = ''; fhPopup?.remove() })
     map.on('click', (e) => {
       const hits = map!.queryRenderedFeatures(e.point, { layers: ['sup-points', 'cl-points', 'cl-circles'].filter((l) => map!.getLayer(l)) })
-      if (!hits.length) onselect(null)
+      if (hits.length) return
+      // Sur écran tactile, un appui sur un faisceau affiche son infobulle sans fermer la fiche.
+      const fh = map!.getLayer('az-fh-hit') ? map!.queryRenderedFeatures(e.point, { layers: ['az-fh-hit'] }) : []
+      if (fh.length) { showFh(fh[0].properties as FhProps, e.lngLat); return }
+      onselect(null)
     })
     map.on('moveend', () => {
       const c = map!.getCenter()
@@ -324,6 +386,12 @@
     ;(map.getSource('zone') as GeoJSONSource | undefined)?.setData(zoneData())
     if (key && key !== lastZone) fitZone()
     lastZone = key
+  })
+  $effect(() => {
+    const a = azimuth
+    if (!ready || !map) return
+    ;(map.getSource('az-cones') as GeoJSONSource | undefined)?.setData(a.cones)
+    ;(map.getSource('az-fh') as GeoJSONSource | undefined)?.setData(a.fh)
   })
   $effect(() => {
     const sel = selected ?? -1
