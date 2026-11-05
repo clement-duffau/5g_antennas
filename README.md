@@ -4,7 +4,8 @@ Site statique pour explorer les **installations radioélectriques de plus de 5 W
 France métropolitaine : supports (pylônes, toits, châteaux d'eau…), exploitants, technologies
 (GSM, UMTS, LTE, 5G NR, FM, TNT, PMR, faisceaux hertziens…), bandes de fréquences et dates de mise en service.
 
-Les données sont régénérées chaque mois par une GitHub Action, puis le site est publié sur GitHub Pages.
+Les données sont régénérées chaque mois par une GitHub Action, puis le site est publié sur GitHub Pages :
+**https://clement-duffau.github.io/atlas-antennes/**
 
 ![Aperçu de la carte](docs/apercu-carte.png)
 
@@ -64,6 +65,7 @@ une minute une fois les fichiers téléchargés.
 |---|---|
 | `npm run dev` | serveur de développement |
 | `npm run check` | vérification des types (svelte-check) |
+| `npm test` | tests unitaires du front (Vitest : géodésie, liaisons FH, azimuts) |
 | `npm run build` | build statique dans `site/dist/` |
 
 ## Architecture
@@ -142,12 +144,22 @@ date, mêmes bandes) sont fusionnés dans les fiches : un site trisectoriel tien
   exploitant, une barre par bande déclarée, couleur par famille de systèmes, opacité selon la part des supports
   concernés. Vues : tout le spectre (échelle logarithmique, bandes UIT), 30 MHz–1 GHz, bandes mobiles, faisceaux
   hertziens ; tableau des bandes. Accessible par l'onglet *Spectre* du panneau de zone et le bouton *Spectre* de la carte.
+- **Azimuts sur la carte.** Depuis la fiche d'un support, on affiche ses secteurs directionnels (tous ou certaines
+  lignes station × système) ; plusieurs supports se cumulent. Chaque azimut est un secteur circulaire (point de
+  destination sur la sphère, arc de 24 points) de longueur et d'ouverture réglables, coloré par opérateur et
+  dédoublonné par exploitant et azimut. Une seule source GeoJSON pour tous les cônes, une autre pour les faisceaux
+  hertziens, sous les supports et sans gestionnaire de clic. Pour une antenne FH, `fhLinks.ts` cherche dans l'index
+  les supports dans l'axe (≤ 2°, ≤ 60 km) qui portent du FH du même exploitant, de préférence avec un azimut qui
+  pointe en retour (± 5°) ; la liaison est tracée en pointillés (« probable » ou « possible »), sinon un trait de
+  longueur fixe. Sur l'Ille-et-Vilaine, 93 % des antennes FH trouvent une liaison « probable ».
 - **Accessibilité.** Audit axe-core sans violation sur toutes les pages, dans les deux thèmes, y compris carte avec
   panneaux ouverts : contrastes calculés (jetons `--on-seq-*` pour le texte posé sur la rampe séquentielle),
   navigation au clavier, lien d'évitement, tableaux de données en alternative aux graphiques, mouvement réduit respecté.
 - **URL partageables** : `#/carte?s=<id du support>&c=<lat>,<lon>&z=<zoom>&m=densite&col=hauteur`, et les filtres :
   `op=Free|Orange&gen=5G&f=3400-3800&y=2025-2026&dep=35&com=35238&nat=…&h=30-350`,
-  et la zone : `zone=<lat>,<lon>,<rayon en m>&zl=<libellé>`.
+  la zone : `zone=<lat>,<lon>,<rayon en m>&zl=<libellé>`, et les azimuts :
+  `az=<id>,<id>.<n° station>_<système sans espaces>…&azl=<longueur en m>&azo=<ouverture en °>`
+  (un numéro seul = tous les secteurs du support ; `azl` et `azo` omis à leur valeur par défaut, 1000 m et 65°).
 
 ## Déploiement
 

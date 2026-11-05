@@ -72,6 +72,11 @@
       <li>Frise : la carte et les courbes cumulées utilisent la date de première mise en service, sur chaque support, d'un
         système de l'opérateur (parc actuel ; un site démonté n'y figure pas). Les courbes « archive par archive » comptent
         le parc déclaré dans chaque extraction mensuelle de l'ANFR depuis septembre 2018, démontages compris.</li>
+      <li>Azimuts : les cônes partent du support dans la direction déclarée de chaque antenne directionnelle. Leur longueur
+        et leur ouverture sont des réglages d'affichage, sans rapport avec la portée ni le diagramme réel des antennes :
+        ils ne représentent pas une couverture. Pour les faisceaux hertziens, la liaison est déduite : un support du même
+        exploitant, dans l'axe à 2° près et à moins de 60 km, avec du FH déclaré ; « probable » si l'une de ses antennes FH
+        pointe en retour (à 5° près), « possible » sinon.</li>
       <li>Spectre : pour chaque exploitant, les bandes déclarées sur les supports de la sélection, telles quelles
         (une bande FDD apparaît comme deux blocs, voie montante et voie descendante). Une bande déclarée n'est pas
         forcément émise en permanence, ni à pleine largeur.</li>
@@ -93,20 +98,20 @@
       {/each}
     </dl>
     <p class="small">
-      Les formats sont décrits dans le <a href="https://github.com/clement-duffau/5g_antennas#readme">README</a> du dépôt.
+      Les formats sont décrits dans le <a href="https://github.com/clement-duffau/atlas-antennes#readme">README</a> du dépôt.
       Pour un usage sérieux, repartez de la source ANFR : ces fichiers sont simplifiés pour l'affichage.
     </p>
 
     <h2>Citer</h2>
     <p class="cite">
       Atlas des antennes radio en France, d'après ANFR, « Données sur les installations radioélectriques de plus de 5 watts »,
-      extraction du {fmtDate(s.meta.extraction)}, Licence Ouverte 2.0. https://clement-duffau.github.io/5g_antennas/
+      extraction du {fmtDate(s.meta.extraction)}, Licence Ouverte 2.0. https://clement-duffau.github.io/atlas-antennes/
     </p>
 
     <h2>Code et crédits</h2>
     <p>
       Le code du pipeline (Python, DuckDB) et du site (Svelte 5, MapLibre GL) est public sur
-      <a href="https://github.com/clement-duffau/5g_antennas">GitHub</a>. Données : ANFR, geo.api.gouv.fr, IGN (contours et géocodage).
+      <a href="https://github.com/clement-duffau/atlas-antennes">GitHub</a>. Données : ANFR, geo.api.gouv.fr, IGN (contours et géocodage).
       Fond de carte : OpenFreeMap, OpenMapTiles, contributeurs OpenStreetMap. Police : Archivo (Omnibus-Type, SIL Open Font License).
     </p>
   {/await}

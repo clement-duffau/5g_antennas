@@ -7,6 +7,10 @@
   import ZonePanel from '../lib/map/ZonePanel.svelte'
   import SpectrumDialog from '../lib/map/SpectrumDialog.svelte'
   import { occupation } from '../lib/spectrum'
+  import AzimuthPanel from '../lib/map/AzimuthPanel.svelte'
+  import { buildAzimuth, type AzimuthLayers } from '../lib/map/azimuthData'
+  import { azimuts } from '../lib/azimuts.svelte'
+  import { decode as decodeAz, encode as encodeAz, type AzState } from '../lib/azimuthSelection'
   import { loadSupports, type SupportIndex } from '../lib/supports'
   import { loadServices, type Services } from '../lib/services'
   import { loadJSON } from '../lib/data'
@@ -32,6 +36,26 @@
   let panelOpen = $state(wide)
   let tab = $state<'filtres' | 'affichage'>('filtres')
   let mapView = $state<MapView>()
+
+  // ------------------------------------------------------------------ azimuts
+  {
+    const a = decodeAz(p)
+    azimuts.list = a.list
+    azimuts.len = a.len
+    azimuts.ap = a.ap
+  }
+  const EMPTY_LAYERS: AzimuthLayers = { cones: { type: 'FeatureCollection', features: [] }, fh: { type: 'FeatureCollection', features: [] } }
+  let azLayers = $state<AzimuthLayers>(EMPTY_LAYERS)
+  let azRun = 0
+  $effect(() => {
+    const st = $state.snapshot(azimuts) as AzState
+    const sv = services
+    setParams(encodeAz(st))
+    const run = ++azRun
+    if (!st.list.length) { azLayers = EMPTY_LAYERS; return }
+    data.then(({ index }) => buildAzimuth(index, sv, st, (l) => { if (run === azRun) azLayers = l }, () => run !== azRun))
+      .catch((e) => console.warn('Azimuts :', e))
+  })
 
   // ------------------------------------------------------------------ filtres
   let filters = $state<Filters>(fromParams(p))
@@ -174,12 +198,12 @@
     <p class="loading">Chargement des supports…</p>
   {:then { index, cats }}
     <MapView bind:this={mapView} {index} {cats} {colorMode} {display} {hidden} visible={result?.mask ?? null} {selected}
-      zone={filters.zone}
+      zone={filters.zone} azimuth={azLayers}
       theme={theme.value} view={initialView}
       onselect={(i) => select(i, index)}
       onview={(v) => setParams({ z: v.zoom, c: `${v.lat},${v.lon}` })} />
 
-    <div class="controls" class:open={panelOpen}>
+    <div class="controls" class:open={panelOpen} class:withaz={azimuts.list.length > 0}>
       <PlaceSearch {index} onpick={pickPlace} />
       <div class="bar">
         <button class="toggle" type="button" onclick={() => (panelOpen = !panelOpen)} aria-expanded={panelOpen}>
@@ -194,6 +218,9 @@
           <button class="spec" type="button" onclick={() => (spectrumOpen = true)} title="Occupation des fréquences de la sélection">Spectre</button>
         {/if}
       </div>
+      {#if azimuts.list.length}
+        <AzimuthPanel {index} onopen={(i) => { select(i, index); mapView?.focus(i) }} />
+      {/if}
       {#if panelOpen}
         <div class="panel">
           <div class="tabs" role="tablist">
@@ -292,6 +319,8 @@
     border: 1px solid var(--line); box-shadow: 0 10px 30px rgb(0 0 0 / 0.25); display: grid; gap: 14px;
     max-height: calc(100dvh - 57px - 130px); overflow-y: auto;
   }
+  /* Avec le panneau Azimuts au-dessus, le panneau des filtres laisse la place. */
+  .controls.withaz .panel { max-height: max(180px, calc(100dvh - 57px - 130px - 330px)); }
   .total { color: var(--text-2); }
   .total strong { color: var(--text); font-weight: 640; }
   fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; }

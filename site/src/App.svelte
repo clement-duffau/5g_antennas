@@ -25,7 +25,7 @@
 <a class="skip" href="#contenu">Aller au contenu</a>
 <header class="top">
   <div class="inner">
-    <a class="brand" href="#/">
+    <a class="brand" href="#/" aria-label="Atlas des antennes radio, accueil">
       <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
         <path d="M16 9v17M11 26l5-17 5 17M8 9a11 11 0 0 1 16 0M11 12a6.5 6.5 0 0 1 10 0" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
