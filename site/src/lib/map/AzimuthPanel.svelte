@@ -8,7 +8,8 @@
   /** Réglages et liste des supports dont les azimuts sont affichés (visible dès qu'il y en a un). */
   let { index, onopen }: { index: SupportIndex; onopen: (i: number) => void } = $props()
 
-  let open = $state(true)
+  // Replié par défaut sur mobile, comme le panneau des filtres.
+  let open = $state(typeof window === "undefined" || window.innerWidth > 720)
   const items = $derived(azimuts.list.map((e) => ({ e, i: index.byId.get(e.id) })).filter((x) => x.i !== undefined) as { e: (typeof azimuts.list)[number]; i: number }[])
   const opsOf = (i: number) => MOBILE_OPS.filter((_, b) => index.ops[i] & (1 << b))
 </script>

@@ -3,6 +3,8 @@
   import { depOf, inseeOf, type SupportIndex } from '../supports'
   import { fmt, fmt1, fmtDate } from '../format'
   import { MOBILE_OPS, opColor } from '../colors'
+  import { drawableRows, rowKey } from '../azimuthSelection'
+  import { globalState, rowChecked, setAll, toggleRow } from '../azimuts.svelte'
 
   let { index, i, onclose, onfocus, back = null }: {
     index: SupportIndex; i: number; onclose: () => void; onfocus: () => void
@@ -92,6 +94,8 @@
       <p class="muted">Fiche introuvable pour ce support.</p>
     {:else}
       {@const p = petals(d)}
+      {@const drawable = drawableRows(d).map((r) => r.key)}
+      {@const gs = globalState(id)}
       {#if d.adr}<p class="adr">{d.adr}{d.cp ? `, ${d.cp}` : ''}</p>{/if}
       <dl class="facts">
         <div><dt>Nature</dt><dd>{d.nat ?? 'inconnue'}</dd></div>
@@ -105,6 +109,19 @@
         <a href="https://www.openstreetmap.org/?mlat={d.lat}&mlon={d.lon}#map=18/{d.lat}/{d.lon}" target="_blank" rel="noopener">OpenStreetMap</a>
         <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint={d.lat},{d.lon}" target="_blank" rel="noopener">Street View</a>
       </p>
+
+      <div class="azctl">
+        <label class:disabled={!drawable.length}>
+          <input type="checkbox" disabled={!drawable.length} checked={gs === 'tout'} indeterminate={gs === 'partiel'}
+            onchange={() => setAll(id, gs !== 'tout')} aria-describedby={drawable.length ? undefined : 'az-none'} />
+          Afficher les azimuts sur la carte
+        </label>
+        {#if !drawable.length}
+          <p id="az-none" class="muted small">Aucune antenne directionnelle avec azimut déclaré sur ce support.</p>
+        {:else if gs === 'partiel'}
+          <p class="muted small">Seules les lignes cochées ci-dessous sont affichées.</p>
+        {/if}
+      </div>
 
       <div class="overview">
         <ul class="who">
@@ -143,10 +160,18 @@
           </p>
           <div class="scroller">
             <table>
-              <thead><tr><th>Système</th><th>Fréquences</th><th>Service</th><th>Azimuts</th></tr></thead>
+              <thead><tr><th><span class="visually-hidden">Afficher sur la carte</span></th><th>Système</th><th>Fréquences</th><th>Service</th><th>Azimuts</th></tr></thead>
               <tbody>
                 {#each st.emr as e, k (k)}
+                  {@const key = rowKey(st.sta, e.s)}
+                  {@const can = drawable.includes(key)}
                   <tr>
+                    <td class="chk">
+                      <input type="checkbox" disabled={!can} checked={can && rowChecked(id, key)}
+                        onchange={() => toggleRow(id, key, drawable)}
+                        aria-label={can ? `Afficher sur la carte les azimuts ${e.s} de ${st.grp}` : `${e.s} : pas d'antenne directionnelle avec azimut`}
+                        title={can ? 'Afficher ces secteurs sur la carte' : 'Pas d\'antenne directionnelle avec azimut'} />
+                    </td>
                     <td class="sys">{e.s}{#if e.n > 1}<span class="muted small"> ×{e.n}</span>{/if}</td>
                     <td class="num">{bands(e.b)}</td>
                     <td class="num">{year(e.d)}</td>
@@ -168,6 +193,11 @@
   .sheet { padding: 18px 20px 28px; display: grid; gap: 14px; align-content: start; }
   header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .kicker { color: var(--muted); font-size: 0.8rem; }
+  .azctl { display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--radius); background: var(--surface-2); }
+  .azctl label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+  .azctl label.disabled { color: var(--muted); cursor: default; }
+  input[type='checkbox'] { accent-color: var(--accent); margin: 0; width: 16px; height: 16px; flex: none; }
+  td.chk { width: 22px; padding-right: 6px; }
   .back { justify-self: start; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font-size: 0.85rem; }
   h2 { font-size: 1.35rem; }
   .dep { color: var(--muted); font-weight: 400; }
