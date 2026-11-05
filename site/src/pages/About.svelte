@@ -72,6 +72,11 @@
       <li>Frise : la carte et les courbes cumulées utilisent la date de première mise en service, sur chaque support, d'un
         système de l'opérateur (parc actuel ; un site démonté n'y figure pas). Les courbes « archive par archive » comptent
         le parc déclaré dans chaque extraction mensuelle de l'ANFR depuis septembre 2018, démontages compris.</li>
+      <li>Azimuts : les cônes partent du support dans la direction déclarée de chaque antenne directionnelle. Leur longueur
+        et leur ouverture sont des réglages d'affichage, sans rapport avec la portée ni le diagramme réel des antennes :
+        ils ne représentent pas une couverture. Pour les faisceaux hertziens, la liaison est déduite : un support du même
+        exploitant, dans l'axe à 2° près et à moins de 60 km, avec du FH déclaré ; « probable » si l'une de ses antennes FH
+        pointe en retour (à 5° près), « possible » sinon.</li>
       <li>Spectre : pour chaque exploitant, les bandes déclarées sur les supports de la sélection, telles quelles
         (une bande FDD apparaît comme deux blocs, voie montante et voie descendante). Une bande déclarée n'est pas
         forcément émise en permanence, ni à pleine largeur.</li>
